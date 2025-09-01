@@ -1,6 +1,5 @@
 # Sisdiv
-Sistema de Amortização de Dívidas
-Este é um aplicativo web desenvolvido com FastAPI e modelos Jinja2.
+Sistema de Amortização de Dívidas. Aplicativo web desenvolvido com FastAPI e modelos Jinja2.
 
 ## Recursos
 
