@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="input-section">
+    <h2>📊 Histórico de Simulações</h2>
+    
+    {% if simulacoes %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Valor (R$)</th>
+                    <th>Taxa (%)</th>
+                    <th>Prazo (meses)</th>
+                    <th>Carência</th>
+                    <th>Método</th>
+                    <th>Data</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sim in simulacoes %}
+                <tr>
+                    <td>{{ sim.id }}</td>
+                    <td>R$ {{ "%.2f"|format(sim.valor) }}</td>
+                    <td>{{ "%.2f"|format(sim.taxa) }}%</td>
+                    <td>{{ sim.prazo }}</td>
+                    <td>{{ sim.carencia }}</td>
+                    <td>{{ sim.metodo }}</td>
+                    <td>{{ sim.data_criacao }}</td>
+                    <td>
+                        <a href="/simulacao/{{ sim.id }}" class="btn-calculate">Ver</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>Nenhuma simulação salva ainda.</p>
+    {% endif %}
+</div>
+{% endblock %}
