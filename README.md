@@ -11,28 +11,32 @@ Sistema de Amortização de Dívidas. Aplicativo web desenvolvido com FastAPI e 
 ## Estrutura do Projeto
 
 ```
-main.py
-requirements.txt
-static/
-style.css
-templates/
-base.html
-index.html
-todo_item.html
+sisdiv/
+├── main.py
+├── test_main.py
+├── requirements.txt
+├── static/
+│ └── style.css
+├── templates/
+│ ├── base.html
+│ ├── index.html
+│ ├── amortizacao.html
+│ └── simulacoes.html
+└── README.md
 ```
 
 ## Instalação
 
 1. Clone o repositório:
 
-```sh
+```bash
 git clone <url-do-seu-repositório>
 cd <diretório-do-projeto>
 ```
 
 2. Instale as dependências:
 
-```sh
+```bash
 pip install -r requirements.txt
 ```
 
@@ -40,11 +44,31 @@ pip install -r requirements.txt
 
 Inicie o servidor FastAPI usando o Uvicorn:
 
-```sh
+```bash
 uvicorn main:app --reload
 ```
 
 Em seguida, abra [http://localhost:8000](http://localhost:8000) no seu navegador.
+
+Executando Testes
+Para executar os testes unitários:
+
+bash
+python -m pytest test_main.py -v
+Ou execute diretamente:
+
+python test_main.py
+
+Desenvolvimento
+O sistema inclui testes unitários que validam:
+
+Cálculos corretos do método SAC
+
+Cálculos corretos do método Price
+
+Comparação entre os dois métodos
+
+Verificação de que SAC é mais vantajoso no total pago
 
 ## Dependências
 
