@@ -1,5 +1,11 @@
 import pytest
-from main import calcular_sac, calcular_price
+import sys
+import os
+
+# Adiciona o diretório raiz ao path para importar o módulo calculos
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from calculos import calcular_sac, calcular_price
 
 def formatar_brl(valor):
     """Formata valores no padrão brasileiro R$ 1.000,00"""
