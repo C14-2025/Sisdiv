@@ -6,6 +6,11 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from calculos import calcular_sac, calcular_price
+from fastapi.testclient import TestClient
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from main import app
+
+client = TestClient(app)
 
 def formatar_brl(valor):
     """Formata valores no padrão brasileiro R$ 1.000,00"""
@@ -13,6 +18,42 @@ def formatar_brl(valor):
 
 class TestAmortizacao:
     """Testes unitários para o sistema de amortização"""
+        # testes de rotas da API
+
+    def test_homepage_html(self):
+        """Verifica se a página inicial carrega corretamente"""
+        response = client.get("/")
+        assert response.status_code == 200
+        assert "text/html" in response.headers["content-type"]
+
+    def test_simulacoes_html(self):
+        """Verifica se a página de simulações carrega corretamente"""
+        response = client.get("/simulacoes/")
+        assert response.status_code == 200
+        assert "text/html" in response.headers["content-type"]
+
+    def test_calculo_json_response(self):
+        """Testa a rota de cálculo e verifica se retorna JSON válido"""
+        response = client.post("/calcular/", data={
+            "valor": 10000,
+            "taxa": 5,
+            "prazo": 12,
+            "carencia": 0,
+            "metodo": "sac",
+            "salvar": False
+        })
+        assert response.status_code == 200
+        data = response.json()
+        assert "sac" in data
+        assert isinstance(data["sac"], list)
+        assert all("prestacao" in p for p in data["sac"])
+
+    def test_simulacao_nao_encontrada(self):
+        """Verifica se o sistema lida corretamente com simulação inexistente"""
+        response = client.get("/simulacao/999999")
+        assert response.status_code == 200
+        assert "Simulação não encontrada" in response.text
+
     
     def test_comparativo_sac_vs_price_total_pago(self):
         """
@@ -106,6 +147,7 @@ class TestAmortizacao:
         prazo = 12
         with pytest.raises(Exception):
             calcular_sac(valor, taxa, prazo)
+
 
 # Execução direta do teste
 if __name__ == "__main__":
