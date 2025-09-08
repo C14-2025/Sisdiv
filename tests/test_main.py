@@ -76,6 +76,36 @@ class TestAmortizacao:
             print("💥 TESTE FALHOU!")
             print("="*60)
             raise e
+        
+    def test_sac_valor_zero(self):
+        """
+        Deve falhar: empréstimo = 0 gera lista vazia ou erro.
+        """
+        valor = 0
+        taxa = 0.01
+        prazo = 12
+        with pytest.raises(Exception):
+            calcular_sac(valor, taxa, prazo)
+
+    def test_price_prazo_negativo(self):
+        """
+        Deve falhar: prazo negativo gera erro.
+        """
+        valor = 100000
+        taxa = 0.01
+        prazo = -5
+        with pytest.raises(Exception):
+            calcular_price(valor, taxa, prazo)
+
+    def test_sac_taxa_negativa(self):
+        """
+        Deve falhar: taxa de juros negativa gera erro.
+        """
+        valor = 100000
+        taxa = -0.01
+        prazo = 12
+        with pytest.raises(Exception):
+            calcular_sac(valor, taxa, prazo)
 
 # Execução direta do teste
 if __name__ == "__main__":
