@@ -53,8 +53,10 @@ Em seguida, abra [http://localhost:8000](http://localhost:8000) no seu navegador
 Executando Testes
 Para executar os testes unitários:
 
-bash
+```bash
 python -m pytest test_main.py -v
+```
+
 Ou execute diretamente:
 
 python test_main.py

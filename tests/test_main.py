@@ -5,7 +5,7 @@ import os
 # Adiciona o diretório raiz ao path para importar o módulo calculos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from calculos import calcular_sac, calcular_price
+from calculos import calcular_sac, calcular_price, calcular_pagamentos_variaveis
 from fastapi.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from main import app
