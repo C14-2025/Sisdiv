@@ -134,6 +134,41 @@ class TestAmortizacao:
         assert len(data["sac"]) == 10
         assert len(data["price"]) == 10
 
+    def test_somente_carencia(self):
+        """Testa se o período de carência gera apenas pagamento de juros"""
+        valor = 1000
+        taxa = 0.05  # 5%
+        carencia = 2
+        amortizacoes = []
+
+        resultado = calcular_pagamentos_variaveis(valor, taxa, amortizacoes, carencia)
+
+        # Durante carência só tem juros (50 por mês)
+        self.assertEqual(resultado[0]['prestacao'], 50)
+        self.assertEqual(resultado[1]['prestacao'], 50)
+        self.assertEqual(resultado[-1]['saldo_devedor'], 1000)  # ainda não amortizou
+
+    def test_amortizacao_total(self):
+        """Testa se a dívida é zerada com amortizações suficientes"""
+        valor = 1000
+        taxa = 0.1  # 10%
+        amortizacoes = [400, 600]  # quita em 2 parcelas
+
+        resultado = calcular_pagamentos_variaveis(valor, taxa, amortizacoes)
+
+        # Após 2 parcelas saldo devedor deve ser zero
+        self.assertEqual(resultado[-1]['saldo_devedor'], 0)
+
+    def test_amortizacao_incompleta(self):
+        """Testa se saldo devedor é reduzido corretamente mas não zera"""
+        valor = 2000
+        taxa = 0.05
+        amortizacoes = [500, 500]  # não quita tudo
+
+        resultado = calcular_pagamentos_variaveis(valor, taxa, amortizacoes)
+
+        # Deve restar 1000 de saldo
+        self.assertEqual(resultado[-1]['saldo_devedor'], 1000)
 
 # Execução direta do teste
 if __name__ == "__main__":
