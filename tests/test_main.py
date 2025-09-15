@@ -4,8 +4,10 @@ import os
 
 # Adiciona o diretório raiz ao path para importar o módulo calculos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from calcular_sac import calcular_sac
+from calcular_price import calcular_price
+from calculo_pagamento_variavel import calculo_pagamento_variavel
 
-from calculos import calcular_sac, calcular_price
 from fastapi.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from main import app
@@ -141,7 +143,7 @@ class TestAmortizacao:
         carencia = 2
         amortizacoes = []
 
-        resultado = calcular_pagamentos_variaveis(valor, taxa, amortizacoes, carencia)
+        resultado = calculo_pagamento_variavel(valor, taxa, amortizacoes, carencia)
 
         # Durante carência só tem juros (50 por mês)
         self.assertEqual(resultado[0]['prestacao'], 50)
@@ -154,7 +156,7 @@ class TestAmortizacao:
         taxa = 0.1  # 10%
         amortizacoes = [400, 600]  # quita em 2 parcelas
 
-        resultado = calcular_pagamentos_variaveis(valor, taxa, amortizacoes)
+        resultado = calculo_pagamento_variavel(valor, taxa, amortizacoes)
 
         # Após 2 parcelas saldo devedor deve ser zero
         self.assertEqual(resultado[-1]['saldo_devedor'], 0)
@@ -165,7 +167,7 @@ class TestAmortizacao:
         taxa = 0.05
         amortizacoes = [500, 500]  # não quita tudo
 
-        resultado = calcular_pagamentos_variaveis(valor, taxa, amortizacoes)
+        resultado = calculo_pagamento_variavel(valor, taxa, amortizacoes)
 
         # Deve restar 1000 de saldo
         self.assertEqual(resultado[-1]['saldo_devedor'], 1000)

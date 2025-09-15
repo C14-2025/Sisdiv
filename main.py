@@ -5,7 +5,9 @@ from fastapi.templating import Jinja2Templates
 import sqlite3
 import os
 from datetime import datetime
-from calculos import calcular_sac, calcular_price  # Importar do módulo calculos
+from calcular_sac import calcular_sac
+from calcular_price import calcular_price
+from calculo_pagamento_variavel import calculo_pagamento_variavel
 
 app = FastAPI(title="Sisdiv - Sistema de Amortização de Dívidas")
 
@@ -48,7 +50,6 @@ def get_db():
         conn.close()
 
 # REMOVA AS FUNÇÕES calcular_sac E calcular_price DAQUI
-# Elas agora estão no módulo calculos.py
 
 # Rotas da aplicação
 @app.get("/", response_class=HTMLResponse)
@@ -64,16 +65,25 @@ async def calcular_amortizacao(
     metodo: str = Form("ambos"),
     salvar: bool = Form(False),
     db: sqlite3.Connection = Depends(get_db)
+
 ):
     taxa_decimal = taxa / 100
     
     resultado = {}
     
     if metodo in ["sac", "ambos"]:
-        resultado["sac"] = calcular_sac(valor, taxa_decimal, prazo, carencia)
+        if (carencia != 0):
+            temcarencia = 1
+        else:
+            temcarencia = 0
+        resultado["sac"] = calcular_sac(valor, taxa_decimal, prazo, carencia, temcarencia)
     
     if metodo in ["price", "ambos"]:
-        resultado["price"] = calcular_price(valor, taxa_decimal, prazo, carencia)
+        if (carencia != 0):
+            temcarencia = 1
+        else:
+            temcarencia = 0
+        resultado["price"] = calcular_price(valor, taxa_decimal, prazo, carencia, temcarencia)
     
     if salvar:
         cursor = db.cursor()
