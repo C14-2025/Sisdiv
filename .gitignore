@@ -57,8 +57,7 @@ Generated\ Files/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
-misc.xml
-Sisdiv.iml
+
 # Approval Tests result files
 *.received.*
 
