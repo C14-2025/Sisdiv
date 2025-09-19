@@ -1,6 +1,7 @@
 import pytest
 import sys
 import os
+from unittest.mock import patch
 
 # Adiciona o diretório raiz ao path para importar o módulo calculos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -170,6 +171,27 @@ class TestAmortizacao:
 
         # Deve restar 1000 de saldo
         self.assertEqual(resultado[-1]['saldo_devedor'], 1000)
+
+    # --- NOVO TESTE COM MOCK ---
+    @patch("main.calcular_sac")
+    def test_calculo_api_mock_erro(self, mock_calcular_sac):
+        """Testa rota /calcular/ simulando erro interno com mock"""
+        # Força o mock a lançar uma exceção
+        mock_calcular_sac.side_effect = Exception("Erro simulado no cálculo")
+
+        response = client.post("/calcular/", data={
+            "valor": 10000,
+            "taxa": 5,
+            "prazo": 12,
+            "carencia": 0,
+            "metodo": "sac",
+            "salvar": False
+        })
+
+        # A API deve responder erro 500
+        assert response.status_code == 500
+        assert "erro" in response.text.lower() or "error" in response.text.lower()
+
 
 # Execução direta do teste
 if __name__ == "__main__":
