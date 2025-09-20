@@ -1,19 +1,35 @@
-import carencia
+# calcular_price.py
 
-from carencia import carencia
+from carencia import carencia as aplicar_carencia
 
-def calcular_price(valor: float, taxa: float, prazo: int, carencia: int = 0, temcarencia: bool = 1):
+def calcular_price(valor: float, taxa: float, prazo: int, carencia: int = 0, temcarencia: bool = True):
+    """
+    Calcula a tabela Price (Sistema Francês de Amortização)
+
+    :param valor: valor do empréstimo
+    :param taxa: taxa de juros em decimal
+    :param prazo: número de parcelas
+    :param carencia: meses de carência
+    :param temcarencia: aplica carência se True
+    :return: lista de parcelas com amortização, juros e saldo_devedor
+    """
+    if valor <= 0 or prazo <= 0 or taxa < 0:
+        raise ValueError("Valor, prazo e taxa devem ser positivos")
+
     dados = []
     saldo_devedor = valor
 
-    if (temcarencia):
-        carencia(carencia, saldo_devedor, taxa)
+    # Aplica carência se houver
+    if temcarencia and carencia > 0:
+        dados += aplicar_carencia(carencia, saldo_devedor, taxa)
 
-    if prazo > 0:
-        prestacao_fixa = (valor * taxa * (1 + taxa) ** prazo) / ((1 + taxa) ** prazo - 1)
+    # Calcula parcela fixa
+    if taxa == 0:
+        prestacao_fixa = valor / prazo
     else:
-        prestacao_fixa = 0
+        prestacao_fixa = (valor * taxa * (1 + taxa) ** prazo) / ((1 + taxa) ** prazo - 1)
 
+    # Monta as parcelas após carência
     for i in range(carencia + 1, carencia + prazo + 1):
         juros = saldo_devedor * taxa
         amortizacao = prestacao_fixa - juros
