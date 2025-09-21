@@ -73,7 +73,19 @@ async def read_root(request: Request):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao carregar página inicial: {str(e)}"
         )
+def calcular_resultados_amortizacao(valor, taxa_decimal, prazo, carencia=0, metodo="ambos", temcarencia=None):
+    """
+    Calcula os resultados de amortização para SAC, Price ou ambos.
+    """
+    resultados = {}
+    if temcarencia is None:
+        temcarencia = 1 if carencia != 0 else 0
 
+    if metodo in ["sac", "ambos"]:
+        resultados["sac"] = calcular_sac(valor, taxa_decimal, prazo, carencia, temcarencia)
+    if metodo in ["price", "ambos"]:
+        resultados["price"] = calcular_price(valor, taxa_decimal, prazo, carencia, temcarencia)
+    return resultados
 
 @app.post("/calcular/")
 async def calcular_amortizacao(
@@ -87,16 +99,8 @@ async def calcular_amortizacao(
 ):
     try:
         taxa_decimal = taxa / 100
-
-        resultado = {}
-
-        if metodo in ["sac", "ambos"]:
-            temcarencia = 1 if carencia != 0 else 0
-            resultado["sac"] = calcular_sac(valor, taxa_decimal, prazo, carencia, temcarencia)
-
-        if metodo in ["price", "ambos"]:
-            temcarencia = 1 if carencia != 0 else 0
-            resultado["price"] = calcular_price(valor, taxa_decimal, prazo, carencia, temcarencia)
+        temcarencia = 1 if carencia != 0 else 0
+        resultado = calcular_resultados_amortizacao(valor, taxa_decimal, prazo, carencia, metodo, temcarencia)
 
         if salvar:
             cursor = db.cursor()
@@ -163,14 +167,11 @@ async def ver_simulacao(request: Request, simulacao_id: int, db: sqlite3.Connect
 
         # Recalcular os dados
         taxa_decimal = simulacao[2] / 100
-        resultados = {}
-
-        if simulacao[5] in ["sac", "ambos"]:
-            resultados["sac"] = calcular_sac(simulacao[1], taxa_decimal, simulacao[3], simulacao[4])
-
-        if simulacao[5] in ["price", "ambos"]:
-            resultados["price"] = calcular_price(simulacao[1], taxa_decimal, simulacao[3], simulacao[4])
-
+        temcarencia = 1 if simulacao[4] != 0 else 0
+        resultados = calcular_resultados_amortizacao(
+            simulacao[1], taxa_decimal, simulacao[3], simulacao[4], simulacao[5], temcarencia
+        )
+        
         return templates.TemplateResponse("amortizacao.html", {
             "request": request,
             "valor": simulacao[1],
