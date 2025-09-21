@@ -4,7 +4,6 @@ from unittest.mock import patch
 from calcular_sac import calcular_sac
 
 def test_calcular_sac_com_carencia_mock():
-    # Arrange
     valor = 1000
     taxa = 0.05
     prazo = 3
@@ -20,7 +19,7 @@ def test_calcular_sac_com_carencia_mock():
 
         # Assert
         mock_carencia.assert_called_once_with(periodo_carencia, valor, taxa)
-        # The result should start with the mocked carencia_resultado
+        # resultado começa com carencia_resultado simulado
         assert resultado[:2] == carencia_resultado
-        # The rest should be the normal SAC calculation
+        # restante é o cálculo normal do SAC
         assert len(resultado) == periodo_carencia + prazo
