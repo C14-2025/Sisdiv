@@ -1,7 +1,7 @@
 import pytest
 import sys
 import os
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
 # Adiciona o diretório raiz ao path para importar módulos
@@ -222,6 +222,39 @@ class TestAmortizacao:
         response_data = response.json()
         assert "detail" in response_data
         assert "erro" in response_data["detail"].lower() or "cálculo" in response_data["detail"].lower()
+
+    @patch("main.get_db")
+    def test_ver_simulacao_mockada(self, mock_get_db):
+        """Testa a rota /simulacao/{id} simulando retorno do banco com mock"""
+        # Cria o mock da conexão e do cursor
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+
+        # Simula retorno de uma simulação válida com todos os campos esperados
+        mock_cursor.fetchone.return_value = (
+            1,              # id
+            1000.0,         # valor
+            5.0,            # taxa
+            12,             # prazo
+            0,              # carencia
+            "sac",          # metodo
+            "2025-09-21 10:00:00"  # data_criacao
+        )
+
+        # Retorna o mock como gerador
+        def fake_get_db():
+            yield mock_conn
+
+        mock_get_db.side_effect = fake_get_db
+
+        # Faz a requisição simulada
+        response = client.get("/simulacao/1")
+
+        # Verifica se a resposta foi bem-sucedida
+        assert response.status_code == 200
+        assert "Simulação" in response.text or "valor" in response.text
+    
 
 # Execução direta do teste
 if __name__ == "__main__":
