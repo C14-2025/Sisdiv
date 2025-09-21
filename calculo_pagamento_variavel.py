@@ -1,28 +1,28 @@
-import carencia
+# calculo_pagamento_variavel.py
 
-from carencia import carencia
+from carencia import carencia as aplicar_carencia
 
-
-def calculo_pagamento_variavel(valor: float, taxa: float, amortizacoes: list, carencia: int = 0, temcarencia: bool = 1):
+def calculo_pagamento_variavel(valor: float, taxa: float, amortizacoes: list, carencia: int = 0, temcarencia: bool = True):
     """
-    Sistema de Pagamentos Variáveis:
-    - Juros do saldo devedor pagos sempre no final de cada período
-    - Amortizações variam conforme lista informada
-
-    :param valor: Valor do empréstimo
-    :param taxa: Taxa de juros (ex: 0.01 para 1% ao mês)
-    :param amortizacoes: Lista com os valores de amortização para cada período
-    :param carencia: Número de meses de carência (paga só juros nesse período)
+    Calcula pagamento variável de acordo com uma lista de amortizações.
+    :param valor: valor do empréstimo
+    :param taxa: taxa de juros em decimal
+    :param amortizacoes: lista de amortizações por período
+    :param carencia: meses de carência
+    :param temcarencia: aplica carência se True
+    :return: lista de parcelas com amortização, juros e saldo_devedor
     """
+    if valor <= 0 or taxa < 0:
+        raise ValueError("Valor e taxa devem ser positivos")
+
     dados = []
     saldo_devedor = valor
-    prazo = len(amortizacoes)
 
-    # Período de carência (só juros)
-    if (temcarencia):
-        carencia(carencia, saldo_devedor, taxa)
+    # Aplica carência se houver
+    if temcarencia and carencia > 0:
+        dados += aplicar_carencia(carencia, saldo_devedor, taxa)
 
-    # Períodos com pagamentos variáveis
+    # Monta as parcelas com base na lista de amortizações
     for i, amortizacao in enumerate(amortizacoes, start=carencia + 1):
         juros = saldo_devedor * taxa
         prestacao = juros + amortizacao
