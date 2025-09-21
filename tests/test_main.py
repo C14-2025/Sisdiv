@@ -1,7 +1,7 @@
 import pytest
 import sys
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, Mock
 from fastapi.testclient import TestClient
 
 # Adiciona o diretório raiz ao path para importar módulos
@@ -11,6 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from calcular_sac import calcular_sac
 from calcular_price import calcular_price
 from calculo_pagamento_variavel import calculo_pagamento_variavel
+from comparacao_SELIC import simular_comparacao_SELIC
 
 # Importa a aplicação FastAPI
 from main import app
@@ -255,6 +256,39 @@ class TestAmortizacao:
         assert response.status_code == 200
         assert "Simulação" in response.text or "valor" in response.text
     
+    @patch('requests.get')
+    def test_simular_comparacao_SELIC(mock_get):
+        mock_response = Mock()
+        responde_dict={0:{"data":"01/09/2025","valor":"10.50"}}
+        mock_response.json.return_value=responde_dict
+        mock_get.return_value=mock_response
+        
+        invests={
+            'selic_atual': 0,
+            'prazo_anos': 2,
+            'valor_investido':1000,
+            'investimentos': [
+                {"tipo": "Tesouro Selic", "percentual_base": 1},
+                {"tipo": "CDB", "percentual_base": 1.10},
+                {"tipo": "LCI", "percentual_base": 1.20}
+            ]
+        }
+
+        result = simular_comparacao_SELIC(invests)
+
+        result_esperado=[
+            {'tipo': 'Tesouro Selic', 'percentual_base': 1, 'rentabilidade_total_percentual': 21.0, 'valor_final': 1210.0}, 
+            {'tipo': 'CDB', 'percentual_base': 1.1, 'rentabilidade_total_percentual': 23.1, 'valor_final': 1231.0}, 
+            {'tipo': 'LCI', 'percentual_base': 1.2, 'rentabilidade_total_percentual': 25.2, 'valor_final': 1252.0}
+        ]
+
+        assert result['selic_atual'] == pytest.approx(10.50, rel=1e-2)
+
+        for resultado, esperado in zip(result['investimentos'], result_esperado):
+            assert resultado['tipo'] == esperado['tipo']
+            assert resultado['percentual_base'] == esperado['percentual_base']
+            assert resultado['rentabilidade_total_percentual'] == pytest.approx(esperado['rentabilidade_total_percentual'], rel=1e-2)
+            assert resultado['valor_final'] == pytest.approx(esperado['valor_final'], rel=1e-2)
 
 # Execução direta do teste
 if __name__ == "__main__":
