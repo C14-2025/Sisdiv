@@ -23,3 +23,17 @@ def test_calcular_sac_com_carencia_mock():
         assert resultado[:2] == carencia_resultado
         # restante é o cálculo normal do SAC
         assert len(resultado) == periodo_carencia + prazo
+
+
+# 🔹 Teste Sac sem periodo de carencia
+def test_calcular_sac_sem_carencia():
+    """Verifica se o cálculo SAC funciona corretamente quando não há período de carência."""
+    valor = 1200
+    taxa = 0.05
+    prazo = 3
+    resultado = calcular_sac(valor, taxa, prazo)
+
+    # Garante que há 3 parcelas no resultado
+    assert len(resultado) == prazo
+    # O saldo devedor final deve ser zero
+    assert resultado[-1]["saldo_devedor"] == 0
