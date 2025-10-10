@@ -3,6 +3,9 @@
 // Variáveis globais
 let sacData = [];
 let priceData = [];
+let sacChartInstance = null;
+let priceChartInstance = null;
+let comparisonChartInstance = null;
 
 // Inicialização quando o documento estiver carregado
 document.addEventListener('DOMContentLoaded', function() {
@@ -199,7 +202,11 @@ function criarGraficos() {
     // Gráfico SAC
     if (sacData.length > 0 && document.getElementById('sacChart')) {
         const ctxSAC = document.getElementById('sacChart').getContext('2d');
-        new Chart(ctxSAC, {
+        // Remove anterior se ela existir
+        if (sacChartInstance) {
+            sacChartInstance.destroy();
+        }
+        sacChartInstance = new Chart(ctxSAC, {
             type: 'line',
             data: {
                 labels: sacData.map(row => `Parcela ${row.parcela}`),
@@ -216,7 +223,11 @@ function criarGraficos() {
     // Gráfico Price
     if (priceData.length > 0 && document.getElementById('priceChart')) {
         const ctxPrice = document.getElementById('priceChart').getContext('2d');
-        new Chart(ctxPrice, {
+        // Remove anterior se ela existir
+        if (priceChartInstance) {
+            priceChartInstance.destroy();
+        }
+        priceChartInstance = new Chart(ctxPrice, {
             type: 'line',
             data: {
                 labels: priceData.map(row => `Parcela ${row.parcela}`),
@@ -233,7 +244,11 @@ function criarGraficos() {
     // Gráfico Comparação
     if (sacData.length > 0 && priceData.length > 0 && document.getElementById('comparisonChart')) {
         const ctxComparison = document.getElementById('comparisonChart').getContext('2d');
-        new Chart(ctxComparison, {
+        // Remove anterior se ela existir
+        if (comparisonChartInstance) {
+            comparisonChartInstance.destroy();
+        }
+        comparisonChartInstance = new Chart(ctxComparison, {
             type: 'bar',
             data: {
                 labels: ['Total Prestações', 'Total Juros', 'Total Amortização'],
