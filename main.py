@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import FastAPI, Request, Form, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -8,6 +9,7 @@ from datetime import datetime
 from calcular_sac import calcular_sac
 from calcular_price import calcular_price
 from calculo_pagamento_variavel import calculo_pagamento_variavel
+from comparacao_SELIC import simular_comparacao_SELIC
 
 app = FastAPI(title="Sisdiv - Sistema de Amortização de Dívidas")
 
@@ -119,6 +121,37 @@ async def calcular_amortizacao(
             detail=f"Erro no cálculo da amortização: {str(e)}"
         )
 
+
+@app.post("/investimentos/")
+def simular_investimentos(
+    valor_investido: float = Form(...),
+    prazo_anos: int = Form(...),
+    percentual_base: dict = Form(...),
+    taxa_atual_SELIC: Optional[float] = Form(None)
+):
+    """
+    Simula diferentes tipos de investimentos com base na taxa SELIC atual
+    ou uma taxa fornecida manualmente.
+
+    Exemplo de percentual_base:
+    percentual_base = {
+        "Tesouro Selic": 1.0,
+        "CDB Banco X": 1.1,
+        "LCA Banco Y": 0.95
+    }
+    """
+    try:
+        resultado = simular_comparacao_SELIC(
+            percentual_base=percentual_base,
+            prazo_anos=prazo_anos,
+            valor_investido=valor_investido,
+            taxa_atual_SELIC=taxa_atual_SELIC
+        )
+
+        return JSONResponse(content=resultado)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"Erro na simulação de investimentos: {str(e)}")
 
 @app.get("/simulacoes/", response_class=HTMLResponse)
 async def listar_simulacoes(request: Request, db: sqlite3.Connection = Depends(get_db)):
