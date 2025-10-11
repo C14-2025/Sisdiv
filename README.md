@@ -57,7 +57,7 @@ Executando Testes
 Para executar os testes unitários:
 
 ```bash
-python -m pytest test_main.py -v
+python -m pytest tests/test_main.py -v
 ```
 
 Ou execute diretamente:
