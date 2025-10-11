@@ -7,6 +7,8 @@ Sistema de Amortização de Dívidas. Aplicativo web desenvolvido com FastAPI e 
 - Interface responsiva com CSS personalizado
 - Backend FastAPI com templates Jinja2
 - Arquivo estático para estilos
+- Fluxo de Caixa e Impacto de Dívidas
+- Gera um relatório detalhado e um gráfico visual (`fluxo_caixa_projecao_exemplo.png`- salvo na pasta 'static/' para consumo pelo frontend).
 
 ## Estrutura do Projeto
 
@@ -22,6 +24,7 @@ sisdiv/
 │ ├── index.html
 │ ├── amortizacao.html
 │ └── simulacoes.html
+├── fluxo_caixa.py
 └── README.md
 ```
 
