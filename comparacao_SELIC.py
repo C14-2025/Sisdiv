@@ -1,26 +1,5 @@
 import requests
 
-'''
-# exemplo de dicionário de entrada:
-invests={
-    'selic_atual': 0, # entrada
-    'prazo_anos': 2, # entrada
-    'valor_investido':1000, #entrada
-    'investimentos': [
-        # percentuais base são entrada como dict ex: {"CDB": 1.10, "LCI": 1.20}
-        {"tipo": "Tesouro Selic", "percentual_base": 1},
-        {"tipo": "CDB", "percentual_base": 1.10},
-        {"tipo": "LCI", "percentual_base": 1.20}
-    ]
-}
-'''
-
-'''
-percentual base é uma entrada do usuário
-Taxa selic pode ser automática ou o usuário coloca manual
-pode continuar retornando um dicionário, porém só com o total_investido 
-'''
-
 def get_taxa_atual_SELIC():
     try:
         # pegando o resultado da API do Banco Central
