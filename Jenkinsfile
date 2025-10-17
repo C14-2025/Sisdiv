@@ -13,12 +13,11 @@ pipeline {
 
     stages {
 
-        stage('Clean Workspace & Checkout') {
+        stage('Checkout') {
             steps {
-                // Wipe old workspace to get latest pyproject.toml etc.
+                // Deleta antigo workspace p/ evitar conflitos
                 deleteDir()
 
-                // Checkout main branch with credentials
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: 'refs/heads/main']],
@@ -48,7 +47,7 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Instala Dependencias') {
             steps {
                 bat """
                 call "%VENV_DIR%\\Scripts\\activate.bat"
@@ -61,7 +60,7 @@ pipeline {
             }
         }
 
-        stage('Build Package') {
+        stage('Build') {
             steps {
                 bat """
                 call "%VENV_DIR%\\Scripts\\activate.bat"
