@@ -75,16 +75,40 @@ pipeline {
         }
     }
 
-    // Top-level post block
     post {
         always {
             archiveArtifacts artifacts: 'dist/**', fingerprint: true
         }
         success {
-            echo "Pipeline bem-sucedida\\"
+            echo "Pipeline bem-sucedida"
+            emailext (
+                subject: "Build Sucesso: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                    Olá!
+
+                    O pipeline '${env.JOB_NAME}' foi executado com sucesso no build #${env.BUILD_NUMBER}.
+                    Veja os detalhes em: ${env.BUILD_URL}
+
+                    Abraços,
+                    Jenkins
+                """,
+                to: 'seuemail@dominio.com'
+            )
         }
         failure {
             echo "Pipeline falhou."
+            emailext (
+                subject: "Build Falhou: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                    Atenção!
+
+                    O pipeline '${env.JOB_NAME}' falhou no build #${env.BUILD_NUMBER}.
+                    Verifique os logs em: ${env.BUILD_URL}
+
+                    Jenkins
+                """,
+                to: 'tulioalmeida67@gmail.com'
+            )
         }
     }
 }
