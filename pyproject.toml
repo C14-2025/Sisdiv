@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Projeto C14"
 readme = "README.md"
 authors = [
-  { name = "test", email = "test@test" }
+  { name = "test", email = "feck@off.com" }
 ]
 license = { text = "MIT" }
 requires-python = ">=3.8"
