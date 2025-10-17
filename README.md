@@ -48,7 +48,7 @@ pip install -r requirements.txt
 Inicie o servidor FastAPI usando o Uvicorn:
 
 ```bash
-uvicorn main:app --reload
+uvicorn src.main:app --reload
 ```
 
 Em seguida, abra [http://localhost:8000](http://localhost:8000) no seu navegador.
