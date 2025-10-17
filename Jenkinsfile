@@ -15,7 +15,6 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                // Deleta antigo workspace p/ evitar conflitos
                 deleteDir()
 
                 checkout([
@@ -54,7 +53,9 @@ pipeline {
 
                 REM Install dependencies if requirements.txt exists
                 if exist requirements.txt (
-                    pip install --cache-dir="%PIP_CACHE_DIR%" -r requirements.txt
+                    python -m pip install --cache-dir="%PIP_CACHE_DIR%" -r requirements.txt
+                ) else (
+                    echo Arquivo requirements.txt não encontrado.
                 )
                 """
             }
@@ -92,7 +93,7 @@ pipeline {
                     Abraços,
                     Jenkins
                 """,
-                to: 'seuemail@dominio.com'
+                to: 'tulioalmeida67@gmail.com'
             )
         }
         failure {
