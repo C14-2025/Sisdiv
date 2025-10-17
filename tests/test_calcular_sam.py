@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from calcular_sam import calcular_sam
+from src.calculadoras.calcular_sam import calcular_sam
 
 
 def test_calcular_sam_com_carencia_mock():

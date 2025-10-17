@@ -1,4 +1,4 @@
-from carencia import carencia as aplicar_carencia  # renomeia a função importada para evitar conflito
+from src.calculadoras.carencia import carencia as aplicar_carencia  # renomeia a função importada para evitar conflito
 from typing import List, Dict, Any
 
 def calcular_sac(valor: float, 

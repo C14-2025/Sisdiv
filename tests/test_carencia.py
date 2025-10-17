@@ -1,6 +1,6 @@
 import pytest
 
-from carencia import carencia
+from src.calculadoras.carencia import carencia
 
 #teste unitario da carencia
 

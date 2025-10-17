@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import os
 
 # --- IMPORTS DE FUNÇÕES AUXILIARES ---
-from calcular_sac import calcular_sac
-from calcular_price import calcular_price
+from src.calculadoras.calcular_sac import calcular_sac
+from src.calculadoras.calcular_price import calcular_price
 
 # --- CONFIGURAÇÃO DE CAMINHO ---
 DIRETORIO_PROJETO = os.path.dirname(os.path.abspath(__file__))

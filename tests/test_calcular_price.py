@@ -7,7 +7,7 @@ from unittest.mock import patch, MagicMock
 # Apenas para garantir que o teste funcione, mas em projetos reais use a estrutura do poetry/pip
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from calcular_price import calcular_price
+from src.calculadoras.calcular_price import calcular_price
 
 class TestAmortizacaoPriceComMock:
     """Testes unitários para o sistema de amortização PRICE com mocks."""

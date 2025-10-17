@@ -1,6 +1,6 @@
 # calculo_pagamento_variavel.py
 
-from carencia import carencia as aplicar_carencia
+from src.calculadoras.carencia import carencia as aplicar_carencia
 
 def calculo_pagamento_variavel(valor: float, taxa: float, amortizacoes: list, carencia: int = 0, temcarencia: bool = True):
     """

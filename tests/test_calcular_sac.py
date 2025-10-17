@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 
-from calcular_sac import calcular_sac
+from src.calculadoras.calcular_sac import calcular_sac
 
 def test_calcular_sac_com_carencia_mock():
     valor = 1000

@@ -8,13 +8,13 @@ from fastapi.testclient import TestClient
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Importa funções de cálculo
-from calcular_sac import calcular_sac
-from calcular_price import calcular_price
-from calculo_pagamento_variavel import calculo_pagamento_variavel
-from comparacao_SELIC import simular_comparacao_SELIC
+from src.calculadoras.calcular_sac import calcular_sac
+from src.calculadoras.calcular_price import calcular_price
+from src.calculadoras.calculo_pagamento_variavel import calculo_pagamento_variavel
+from src.calculadoras.comparacao_SELIC import simular_comparacao_SELIC
 
 # Importa a aplicação FastAPI
-from main import app
+from src.main import app
 
 # Cliente de teste para simular requisições HTTP
 client = TestClient(app)

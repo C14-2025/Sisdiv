@@ -1,6 +1,6 @@
 # calcular_sam.py
 
-from carencia import carencia as aplicar_carencia
+from src.calculadoras.carencia import carencia as aplicar_carencia
 
 def calcular_sam(valor: float, taxa: float, prazo: int, carencia: int = 0, temcarencia: bool = True):
     """
