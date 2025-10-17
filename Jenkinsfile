@@ -93,7 +93,7 @@ pipeline {
                     Abraços,
                     Jenkins
                 """,
-                to: 'tulioalmeida67@gmail.com'
+                to: 'teste@gmail.com'
             )
         }
         failure {
@@ -108,7 +108,7 @@ pipeline {
 
                     Jenkins
                 """,
-                to: 'tulioalmeida67@gmail.com'
+                to: 'teste@gmail.com'
             )
         }
     }
