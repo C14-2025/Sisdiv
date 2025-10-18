@@ -74,11 +74,28 @@ pipeline {
                 """
             }
         }
+
+        stage('Generate Logs') {
+            steps {
+                bat """
+                call "%VENV_DIR%\\Scripts\\activate.bat"
+
+                REM create logs directory if it does not exists
+                if not exist logs mkdir logs
+
+                REM Execute application for 20 seconds and saves the output
+                start "" /B python src\\main.py > logs\\main.log 2>&1
+                timeout /T 20
+                taskkill /F /IM python.exe > NUL 2>&1
+                """
+            }
+        }
     }
 
     post {
         always {
             archiveArtifacts artifacts: 'dist/**', fingerprint: true
+            archiveArtifacts artifacts: 'logs/**/*.log', fingerprint: true
         }
         success {
             echo "Pipeline bem-sucedida"
