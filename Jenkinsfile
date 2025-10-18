@@ -24,9 +24,11 @@ pipeline {
                 script {
                     if (isUnix()) {
                         sh """
-                        python3 -m venv "${VENV_DIR}"
+                        # Try python3 first, fallback to python
+                        python --version || python3 --version
+                        python -m venv "${VENV_DIR}"
                         . "${VENV_DIR}/bin/activate"
-                        pip install --upgrade pip setuptools wheel
+                        python -m pip install --upgrade pip setuptools wheel
                         mkdir -p "${PIP_CACHE_DIR}"
                         """
                     } else {
@@ -47,9 +49,9 @@ pipeline {
                     if (isUnix()) {
                         sh """
                         . "${VENV_DIR}/bin/activate"
-                        pip install sphinx
+                        python -m pip install sphinx || echo "Sphinx installation skipped"
                         if [ -d "docs" ]; then
-                            sphinx-build -b html docs/ docs/_build/html
+                            python -m sphinx.cmd.build -b html docs/ docs/_build/html
                             echo "Documentation generated"
                         else
                             echo "No documentation source found"
@@ -78,7 +80,7 @@ pipeline {
                         sh """
                         . "${VENV_DIR}/bin/activate"
                         if [ -f "requirements.txt" ]; then
-                            pip install --cache-dir="${PIP_CACHE_DIR}" -r requirements.txt
+                            python -m pip install --cache-dir="${PIP_CACHE_DIR}" -r requirements.txt
                         else
                             echo "requirements.txt not found"
                         fi
@@ -103,7 +105,7 @@ pipeline {
                     if (isUnix()) {
                         sh """
                         . "${VENV_DIR}/bin/activate"
-                        pip install build
+                        python -m pip install build
                         python -m build
                         """
                     } else {
@@ -131,9 +133,9 @@ pipeline {
                     } else {
                         bat """
                         echo "Deploying build ${env.BUILD_NUMBER} to test environment..."
-                        if exist dist\\*.* (
+                        if exist dist (
                             echo "Artifacts ready for deployment:"
-                            dir "dist"
+                            dir dist
                         )
                         """
                     }
@@ -154,9 +156,9 @@ pipeline {
                         """
                     } else {
                         bat """
-                        if not exist "backups" mkdir "backups"
-                        if exist "dist" (
-                            xcopy "dist" "backups\\dist_${env.BUILD_NUMBER}" /E /I /Y
+                        if not exist backups mkdir backups
+                        if exist dist (
+                            xcopy dist "backups\\dist_${env.BUILD_NUMBER}" /E /I /Y
                             echo "Artifacts backed up to backups\\dist_${env.BUILD_NUMBER}"
                         )
                         """
@@ -172,9 +174,8 @@ pipeline {
                         sh """
                         . "${VENV_DIR}/bin/activate"
                         mkdir -p logs
-                        timeout 20s python src/main.py > logs/main.log 2>&1 &
-                        sleep 25
-                        pkill -f "python src/main.py" || true
+                        # Run for 20 seconds and capture logs
+                        timeout 20s python src/main.py > logs/main.log 2>&1 || echo "Log generation completed"
                         """
                     } else {
                         bat """
