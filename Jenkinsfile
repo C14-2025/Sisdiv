@@ -129,7 +129,7 @@ pipeline {
             }
         }
 
-         stage('Integration Tests') {  
+        stage('Integration Tests') {  
             steps {
                 script {
                     if (isUnix()) {
@@ -212,12 +212,14 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'dist/**', fingerprint: true
-            archiveArtifacts artifacts: 'logs/**/*.log', fingerprint: true
-            archiveArtifacts artifacts: 'backups/**', fingerprint: true
-            
-            script {
-                currentBuild.description = "Build #${env.BUILD_NUMBER} - ${currentBuild.result}"
+            node {
+                archiveArtifacts artifacts: 'dist/**', fingerprint: true
+                archiveArtifacts artifacts: 'logs/**/*.log', fingerprint: true
+                archiveArtifacts artifacts: 'backups/**', fingerprint: true
+
+                script {
+                    currentBuild.description = "Build #${env.BUILD_NUMBER} - ${currentBuild.result}"
+                }
             }
         }
         success {
