@@ -212,7 +212,7 @@ pipeline {
 
     post {
         always {
-            node {
+            node ('mestre') {
                 archiveArtifacts artifacts: 'dist/**', fingerprint: true
                 archiveArtifacts artifacts: 'logs/**/*.log', fingerprint: true
                 archiveArtifacts artifacts: 'backups/**', fingerprint: true
