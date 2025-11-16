@@ -136,13 +136,13 @@ pipeline {
                         sh """
                         . "${VENV_DIR}/bin/activate"
                         pip install pytest pytest-asyncio httpx
-                        pytest src/tests/test_integration.py --maxfail=1 --disable-warnings -v
+                        pytest tests/test_integration.py --maxfail=1 --disable-warnings -v
                         """
                     } else {
                         bat """
                         call "${VENV_DIR}\\Scripts\\activate.bat"
                         python -m pip install pytest pytest-asyncio httpx
-                        python -m pytest src\\tests\\test_integration.py --maxfail=1 --disable-warnings -v
+                        python -m pytest tests\\test_integration.py --maxfail=1 --disable-warnings -v
                         """
                     }
                 }
