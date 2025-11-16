@@ -1,8 +1,20 @@
-#tests/test_integration.py
+# tests/test_integration.py
 # Descrição: Testes de integração do sistema de amortização
 
 import pytest
 import time
+from fastapi.testclient import TestClient
+from src.main import app
+
+
+# ========== FIXTURE NECESSÁRIA ==========
+@pytest.fixture(scope="module")
+def client():
+    """Cria um cliente de teste da aplicação FastAPI"""
+    return TestClient(app)
+
+
+# ========== TESTES DE INTEGRAÇÃO ==========
 
 # Rota principal
 def test_homepage_integration(client):
@@ -23,7 +35,8 @@ def test_calcular_sac_integration(client):
     assert "sac" in data
     assert len(data["sac"]) == 6
 
- #Cálculo PRICE 
+
+# Cálculo PRICE 
 def test_calcular_price_integration(client):
     response = client.post("/calcular/", data={
         "valor": 5000, "taxa": 8, "prazo": 5,
@@ -56,7 +69,7 @@ def test_calcular_metodo_invalido(client):
     assert response.status_code in [400, 422]
 
 
-#Campos ausentes
+# Campos ausentes
 def test_calcular_campos_faltando(client):
     response = client.post("/calcular/", data={
         "valor": 10000,
@@ -66,7 +79,7 @@ def test_calcular_campos_faltando(client):
     assert response.status_code in [400, 422]
 
 
-#Simulação de salvar no banco
+# Simulação de salvar no banco
 def test_calcular_integration_salvar(client):
     response = client.post("/calcular/", data={
         "valor": 12000, "taxa": 6, "prazo": 10,
@@ -83,7 +96,7 @@ def test_rota_inexistente_integration(client):
     assert response.status_code == 404
 
 
-#Taxa zero
+# Taxa zero
 def test_taxa_zero_integration(client):
     response = client.post("/calcular/", data={
         "valor": 10000, "taxa": 0, "prazo": 6,
@@ -103,7 +116,7 @@ def test_valor_negativo_integration(client):
     assert response.status_code in [400, 422]
 
 
-#Fluxo completo SAC: acessar → calcular → salvar
+# Fluxo completo SAC: acessar → calcular → salvar
 def test_fluxo_completo_sac(client):
     r1 = client.get("/")
     assert r1.status_code == 200
@@ -153,6 +166,3 @@ def test_prazo_curto_integration(client):
     assert response.status_code == 200
     data = response.json()
     assert len(data["price"]) == 1
-
-
-
