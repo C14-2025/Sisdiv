@@ -57,7 +57,7 @@ def test_calcular_carencia_integration(client):
     assert response.status_code == 200
     data = response.json()
     assert "sac" in data
-    assert len(data["sac"]) == 8
+    assert len(data["sac"]) == 10
 
 
 # Método inválido
