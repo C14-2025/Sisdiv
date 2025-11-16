@@ -129,20 +129,20 @@ pipeline {
             }
         }
 
-        stage('Integration Tests') {  
+          stage('Integration Tests') {  
             steps {
                 script {
                     if (isUnix()) {
                         sh """
                         . "${VENV_DIR}/bin/activate"
-                        pip install pytest
-                        pytest src/tests/test_integration_api.py --maxfail=1 --disable-warnings
+                        pip install pytest pytest-asyncio httpx
+                        pytest src/tests/test_integration.py --maxfail=1 --disable-warnings -v
                         """
                     } else {
                         bat """
                         call "${VENV_DIR}\\Scripts\\activate.bat"
-                        python -m pip install pytest
-                        python -m pytest src\\tests\\test_integration_api.py --maxfail=1 --disable-warnings
+                        python -m pip install pytest pytest-asyncio httpx
+                        python -m pytest src\\tests\\test_integration.py --maxfail=1 --disable-warnings -v
                         """
                     }
                 }
