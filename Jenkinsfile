@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '10'))
-        timestamps()
-    }
-
     environment {
         VENV_DIR = "${WORKSPACE}/.venv"
         PIP_CACHE_DIR = "${WORKSPACE}/.pip_cache"
@@ -235,7 +230,7 @@ pipeline {
             emailext (
                 subject: "FALHA: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: "Build falhou!\nVerifique: ${env.BUILD_URL}",
-                to: 'tulioalmeida67@gmail.com'
+                to: 'teste@gmail.com'
             )
         }
     }
