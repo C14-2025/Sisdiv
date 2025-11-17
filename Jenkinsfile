@@ -207,15 +207,14 @@ pipeline {
 
     post {
         always {
-            node ('mestre') {
-                archiveArtifacts artifacts: 'dist/**', fingerprint: true
-                archiveArtifacts artifacts: 'logs/**/*.log', fingerprint: true
-                archiveArtifacts artifacts: 'backups/**', fingerprint: true
+            archiveArtifacts artifacts: 'dist/**', fingerprint: true
+            archiveArtifacts artifacts: 'logs/**/*.log', fingerprint: true
+            archiveArtifacts artifacts: 'backups/**', fingerprint: true
 
-                script {
-                    currentBuild.description = "Build #${env.BUILD_NUMBER} - ${currentBuild.result}"
-                }
+            script{
+                currentBuild.description = "Build #${env.BUILD_NUMBER} - ${currentBuild.result}"
             }
+            
         }
         success {
             echo "Pipeline executada com sucesso!"
