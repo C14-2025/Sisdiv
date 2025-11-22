@@ -293,12 +293,42 @@ function exportToPDF(tipo) {
     let data = tipo === 'sac' ? sacData : priceData;
     if (!data.length) return;
 
-    doc.text(`Tabela ${tipo.toUpperCase()} - Amortização`, 10, 10);
-    let y = 20;
-    data.forEach(row => {
-        doc.text(`${row.parcela} | R$ ${row.prestacao.toFixed(2)} | R$ ${row.juros.toFixed(2)} | R$ ${row.amortizacao.toFixed(2)} | R$ ${row.saldo_devedor.toFixed(2)}`, 10, y);
-        y += 10;
+    doc.setFontSize(16);
+    doc.text(`Tabela ${tipo.toUpperCase()} - Amortização`, 14, 15);
+
+    // Prepare table headers
+    const headers = [
+        ["Parcela", "Prestação", "Juros", "Amortização", "Saldo Devedor"]
+    ];
+
+    // Prepare table rows
+    const rows = data.map(row => [
+        row.parcela,
+        `R$ ${row.prestacao.toFixed(2)}`,
+        `R$ ${row.juros.toFixed(2)}`,
+        `R$ ${row.amortizacao.toFixed(2)}`,
+        `R$ ${row.saldo_devedor.toFixed(2)}`
+    ]);
+
+    doc.autoTable({
+        startY: 25,
+        head: headers,
+        body: rows,
+        styles: {
+            fontSize: 10,
+            cellPadding: 4
+        },
+        headStyles: {
+            fillColor: [102, 126, 234],  // Azul do seu tema
+            textColor: 255,
+            halign: 'center'
+        },
+        alternateRowStyles: {
+            fillColor: [240, 240, 240]
+        },
+        margin: { left: 14, right: 14 },
     });
+
     doc.save(`${tipo}_amortizacao.pdf`);
 }
 
