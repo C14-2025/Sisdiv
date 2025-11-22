@@ -118,6 +118,21 @@
         <div class="summary-cards" id="comparisonSummary"></div>
     </div>
     {% endif %}
+  <div class="export-buttons">
+
+    <!-- Botão de salvar simulação -->
+    <form action="/salvar_simulacao" method="post" style="display:inline-block;">
+        <input type="hidden" name="valor" value="{{ valor }}">
+        <input type="hidden" name="taxa" value="{{ taxa }}">
+        <input type="hidden" name="prazo" value="{{ prazo }}">
+        <input type="hidden" name="carencia" value="{{ carencia }}">
+        <input type="hidden" name="metodo" value="{{ metodo }}">
+
+        <button type="submit" class="btn-export">Salvar Simulação</button>
+    </form>
+
+</div>
+
 </div>
 
 <!-- Variáveis JS globais para os gráficos -->
@@ -126,3 +141,4 @@
     const priceData = {{ resultados.price | tojson if resultados.price else '[]' }};
 </script>
 {% endblock %}
+
