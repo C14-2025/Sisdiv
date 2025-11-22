@@ -32,7 +32,7 @@ async function calcular() {
     const prazo = parseInt(document.getElementById('prazo').value);
     const carencia = parseInt(document.getElementById('carencia').value) || 0;
     const metodo = document.getElementById('metodo').value;
-    const salvar = document.getElementById('salvar').checked;
+    const salvar = false;
 
     if (!valor || !taxa || !prazo) {
         alert('Por favor, preencha todos os campos obrigatórios!');
@@ -47,7 +47,6 @@ async function calcular() {
         formData.append('prazo', prazo);
         formData.append('carencia', carencia);
         formData.append('metodo', metodo);
-        formData.append('salvar', salvar);
 
         const response = await fetch('/calcular/', {
             method: 'POST',
@@ -307,4 +306,37 @@ function exportToPDF(tipo) {
 function limparCampos() {
     document.getElementById('simulacaoForm').reset();
     document.getElementById('resultsSection').style.display = 'none';
+}
+
+async function salvarSimulacao() {
+    // Reuse the inputs from the page
+    const valor = parseFloat(document.getElementById('valor').value);
+    const taxa = parseFloat(document.getElementById('taxa').value);
+    const prazo = parseInt(document.getElementById('prazo').value);
+    const carencia = parseInt(document.getElementById('carencia').value) || 0;
+    const metodo = document.getElementById('metodo').value;
+
+    const formData = new FormData();
+    formData.append('valor', valor);
+    formData.append('taxa', taxa);
+    formData.append('prazo', prazo);
+    formData.append('carencia', carencia);
+    formData.append('metodo', metodo);
+
+    try {
+        const response = await fetch("/salvar_simulacao", {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            alert("Erro ao salvar simulação.");
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao conectar ao servidor.");
+    }
 }
