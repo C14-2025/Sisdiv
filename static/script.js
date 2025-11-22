@@ -339,7 +339,7 @@ function limparCampos() {
 }
 
 async function salvarSimulacao() {
-    // Reuse the inputs from the page
+    // Reuse the inputs 'fr'om the page
     const valor = parseFloat(document.getElementById('valor').value);
     const taxa = parseFloat(document.getElementById('taxa').value);
     const prazo = parseInt(document.getElementById('prazo').value);

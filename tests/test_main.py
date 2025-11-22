@@ -43,12 +43,12 @@ class TestAmortizacao:
     def test_calculo_json_response(self):
         """Testa la rota de cálculo e verifica se retorna JSON válido"""
         response = client.post("/calcular/", data={
-            "valor": 10000,
-            "taxa": 5,
-            "prazo": 12,
-            "carencia": 0,
+            "valor": "10000",
+            "taxa": "5",
+            "prazo": "12",
+            "carencia": "0",
             "metodo": "sac",
-            "salvar": False
+            "salvar": "False"
         })
         assert response.status_code == 200
         data = response.json()
@@ -128,12 +128,12 @@ class TestAmortizacao:
     def test_calculo_ambos_metodos_api(self):
         """Testa rota /calcular/ com método 'ambos'"""
         response = client.post("/calcular/", data={
-            "valor": 50000,
-            "taxa": 1.5,
-            "prazo": 10,
-            "carencia": 0,
+            "valor": "50000",
+            "taxa": "1.5",
+            "prazo": "10",
+            "carencia": "0",
             "metodo": "ambos",
-            "salvar": False
+            "salvar": "False"
         })
         assert response.status_code == 200
         data = response.json()
@@ -208,12 +208,12 @@ class TestAmortizacao:
         mock_calcular_sac.side_effect = Exception("Erro simulado no cálculo")
 
         response = client.post("/calcular/", data={
-            "valor": 10000,
-            "taxa": 5,
-            "prazo": 12,
-            "carencia": 0,
+            "valor": "10000",
+            "taxa": "5",
+            "prazo": "12",
+            "carencia": "0",
             "metodo": "sac",
-            "salvar": False
+            "salvar": "False"
         })
 
         # A API deve responder erro 500
