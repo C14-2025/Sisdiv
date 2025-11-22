@@ -2,6 +2,7 @@
 
 {% block content %}
 <!-- Seção de Exemplo -->
+<!--
 <div class="example-section">
     <h3>📊 Exemplo Prático</h3>
     <p><strong>Cenário:</strong> Financiamento de R$ 100.000,00 a 1% ao mês por 12 parcelas</p>
@@ -9,6 +10,7 @@
     <p><strong>Price:</strong> Parcelas fixas de R$ 8.884,88</p>
     <p>Use os valores abaixo ou insira seus próprios dados!</p>
 </div>
+-->
 
 <!-- Seção de Input -->
 <div class="input-section">
@@ -17,19 +19,19 @@
         <div class="form-grid">
             <div class="form-group">
                 <label for="valor">Valor do Empréstimo (R$)</label>
-                <input type="number" id="valor" name="valor" value="100000" step="0.01" min="0" required>
+                <input type="number" id="valor" name="valor" value="null" step="0.01" min="0" required>
             </div>
             <div class="form-group">
                 <label for="taxa">Taxa de Juros (% ao mês)</label>
-                <input type="number" id="taxa" name="taxa" value="1" step="0.01" min="0" required>
+                <input type="number" id="taxa" name="taxa" value="null" step="0.01" min="0" required>
             </div>
             <div class="form-group">
                 <label for="prazo">Prazo (meses)</label>
-                <input type="number" id="prazo" name="prazo" value="12" min="1" required>
+                <input type="number" id="prazo" name="prazo" value="null" min="1" required>
             </div>
             <div class="form-group">
                 <label for="carencia">Carência (meses)</label>
-                <input type="number" id="carencia" name="carencia" value="0" min="0">
+                <input type="number" id="carencia" name="carencia" value="null" min="0">
             </div>
             <div class="form-group">
                 <label for="metodo">Método de Amortização</label>
@@ -38,10 +40,6 @@
                     <option value="sac">SAC</option>
                     <option value="price">Price</option>
                 </select>
-            </div>
-            <div class="form-group">
-                <label for="salvar">Salvar simulação</label>
-                <input type="checkbox" id="salvar" name="salvar">
             </div>
         </div>
 
@@ -72,6 +70,7 @@
         <div class="export-buttons">
             <button class="btn-export" onclick="exportToCSV('sac')">📄 Exportar CSV</button>
             <button class="btn-export" onclick="exportToPDF('sac')">📋 Exportar PDF</button>
+            <button class="btn-export" onclick="salvarSimulacao()">💾 Salvar Simulação</button>
         </div>
     </div>
 
