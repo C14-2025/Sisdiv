@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request, Form, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import RedirectResponse
 import sqlite3
 import os
 from datetime import datetime
@@ -25,7 +26,7 @@ templates = Jinja2Templates(directory="templates")
 # Inicializar banco de dados
 def init_db():
     try:
-        conn = sqlite3.connect("sisdiv.db")
+        conn = sqlite3.connect("sisdiv.db", check_same_thread=False)
         cursor = conn.cursor()
 
         cursor.execute('''
@@ -52,7 +53,7 @@ init_db()
 
 def get_db():
     try:
-        conn = sqlite3.connect("sisdiv.db")
+        conn = sqlite3.connect("sisdiv.db", check_same_thread=False)
         conn.row_factory = sqlite3.Row
         try:
             yield conn
@@ -96,23 +97,12 @@ async def calcular_amortizacao(
         prazo: int = Form(...),
         carencia: int = Form(0),
         metodo: str = Form("ambos"),
-        salvar: bool = Form(False),
         db: sqlite3.Connection = Depends(get_db)
 ):
     try:
         taxa_decimal = taxa / 100
         temcarencia = 1 if carencia != 0 else 0
         resultado = calcular_resultados_amortizacao(valor, taxa_decimal, prazo, carencia, metodo, temcarencia)
-
-        if salvar:
-            cursor = db.cursor()
-            cursor.execute(
-                "INSERT INTO simulacoes (valor, taxa, prazo, carencia, metodo, data_criacao) VALUES (?, ?, ?, ?, ?, ?)",
-                (valor, taxa, prazo, carencia, metodo, datetime.now())
-            )
-            db.commit()
-            resultado["simulacao_id"] = cursor.lastrowid
-
         return JSONResponse(content=resultado)
 
     except Exception as e:
@@ -221,8 +211,52 @@ async def ver_simulacao(request: Request, simulacao_id: int, db: sqlite3.Connect
             detail=f"Erro ao carregar simulação: {str(e)}"
         )
 
+@app.post("/simulacao/{simulacao_id}/delete")
+async def deletar_simulacao(simulacao_id: int, db: sqlite3.Connection = Depends(get_db)):
+    try:
+        cursor = db.cursor()
+        cursor.execute("DELETE FROM simulacoes WHERE id = ?", (simulacao_id,))
+        db.commit()
+
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Simulação não encontrada")
+
+        # Redirect back to the simulations page
+        return RedirectResponse(url="/simulacoes/", status_code=303)
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao deletar simulação: {str(e)}"
+        )
+    
+@app.post("/salvar_simulacao")
+async def salvar_simulacao(
+    valor: float = Form(...),
+    taxa: float = Form(...),
+    prazo: int = Form(...),
+    carencia: int = Form(...),
+    metodo: str = Form(...),
+    db: sqlite3.Connection = Depends(get_db)
+):
+    try:
+        cursor = db.cursor()
+        cursor.execute(
+            "INSERT INTO simulacoes (valor, taxa, prazo, carencia, metodo, data_criacao) VALUES (?, ?, ?, ?, ?, ?)",
+            (valor, taxa, prazo, carencia, metodo, datetime.now().strftime("%d-%m-%Y"))
+        )
+        db.commit()
+
+        return RedirectResponse("/simulacoes/", status_code=303)
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao salvar simulação: {str(e)}"
+        )
 
 if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+
