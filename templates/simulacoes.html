@@ -19,6 +19,7 @@
                     <th>Ações</th>
                 </tr>
             </thead>
+
             <tbody>
                 {% for sim in simulacoes %}
                 <tr>
@@ -29,9 +30,14 @@
                     <td>{{ sim.carencia }}</td>
                     <td>{{ sim.metodo }}</td>
                     <td>{{ sim.data_criacao }}</td>
-                    <td>
-                        <a href="/simulacao/{{ sim.id }}" class="btn-calculate">Ver</a>
-                    </td>
+<td class="sim-actions">
+    <a href="/simulacao/{{ sim.id }}" class="btn-calculate">Ver</a>
+
+    <form action="/simulacao/{{ sim.id }}/delete" method="post"
+          onsubmit="return confirm('Excluir esta simulação?');">
+        <button class="btn-calculate" type="submit">Excluir</button>
+    </form>
+</td>
                 </tr>
                 {% endfor %}
             </tbody>
