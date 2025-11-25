@@ -3,6 +3,7 @@ import sys
 import os
 from unittest.mock import patch, MagicMock, Mock
 from fastapi.testclient import TestClient
+import sqlite3
 
 # Adiciona o diretório raiz ao path para importar módulos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -14,7 +15,7 @@ from src.calculadoras.calculo_pagamento_variavel import calculo_pagamento_variav
 from src.calculadoras.comparacao_SELIC import simular_comparacao_SELIC
 
 # Importa a aplicação FastAPI
-from src.main import app
+from src.main import app, get_db
 
 # Cliente de teste para simular requisições HTTP
 client = TestClient(app)
@@ -294,3 +295,85 @@ if __name__ == "__main__":
     test_instance.test_price_valor_muito_alto()
     test_instance.test_calculo_ambos_metodos_api()
     print("🎉 Todos os testes foram executados!")
+
+#------------------------------------------------------
+def override_get_db():
+    conn = sqlite3.connect(":memory:", check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE simulacoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            valor REAL NOT NULL,
+            taxa REAL NOT NULL,
+            prazo INTEGER NOT NULL,
+            carencia INTEGER DEFAULT 0,
+            metodo TEXT NOT NULL,
+            data_criacao TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+app.dependency_overrides[get_db] = override_get_db
+
+def test_salvar_simulacao(self, client):
+        form_data = {
+            "valor": "100000",
+            "taxa": "1.5",
+            "prazo": "12",
+            "carencia": "0",
+            "metodo": "sac",
+        }
+
+        response = client.post("/salvar_simulacao", data=form_data, allow_redirects=False)
+
+        # Check redirect (303)
+        assert response.status_code == 200
+        assert response.headers["location"] == "/simulacoes/"
+
+        # Check save in database
+        db = next(override_get_db())
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM simulacoes")
+        rows = cursor.fetchall()
+
+        assert len(rows) == 1
+        row = rows[0]
+        assert row["valor"] == 100000
+        assert row["metodo"] == "sac"
+
+def test_deletar_simulacao(self, client):
+        """Insert manually, then delete via API"""
+        db = next(override_get_db())
+        cursor = db.cursor()
+
+        cursor.execute("""
+            INSERT INTO simulacoes (valor, taxa, prazo, carencia, metodo, data_criacao)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (50000, 2.0, 10, 0, "price", "01-01-2025"))
+
+        sim_id = cursor.lastrowid
+        db.commit()
+
+        response = client.post(f"/simulacao/{sim_id}/delete", allow_redirects=False)
+
+        assert response.status_code == 303
+        assert response.headers["location"] == "/simulacoes/"
+
+        cursor.execute("SELECT * FROM simulacoes WHERE id = ?", (sim_id,))
+        assert cursor.fetchone() is None
+
+def test_deletar_simulacao_inexistente(self, client):
+        response = client.post("/simulacao/999/delete", allow_redirects=False)
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Simulação não encontrada"
+
+
+
+
