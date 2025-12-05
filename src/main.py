@@ -255,6 +255,29 @@ async def salvar_simulacao(
             detail=f"Erro ao salvar simulação: {str(e)}"
         )
 
+# --- ROTA DE HEALTH CHECK ---
+@app.get("/healthcheck")
+async def healthcheck(db: sqlite3.Connection = Depends(get_db)):
+    import time
+    inicio = time.time()
+
+    try:
+        cursor = db.cursor()
+        cursor.execute("SELECT 1")  # testa o banco
+        db_status = "ok"
+    except Exception as e:
+        db_status = f"erro: {str(e)}"
+
+    fim = time.time()
+
+    return {
+        "status": "ok",
+        "api": "online",
+        "database": db_status,
+        "latencia_ms": round((fim - inicio) * 1000, 2)
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
 
