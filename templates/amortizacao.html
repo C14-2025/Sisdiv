@@ -36,7 +36,13 @@
         {% if resultados.price %}
         <button class="tab-button" onclick="showTab('price')">📊 Price</button>
         {% endif %}
-        {% if resultados.sac and resultados.price %}
+        {% if resultados.sam %}
+        <button class="tab-button" onclick="showTab('sam')">📊 Sam</button>
+        {% endif %}
+        {% if resultados.pagamento_variavel %}
+        <button class="tab-button" onclick="showTab('pagamento variavel')">📊 Pagamento Variavel</button>
+        {% endif %}
+        {% if resultados.sac and resultados.price % and resultados.sam and resultados.pagamento_variavel}
         <button class="tab-button" onclick="showTab('comparison')">⚖️ Comparação</button>
         {% endif %}
     </div>
@@ -61,6 +67,40 @@
                 </thead>
                 <tbody>
                     {% for row in resultados.sac %}
+                    <tr>
+                        <td>{{ row.parcela }}</td>
+                        <td>R$ {{ "%.2f"|format(row.prestacao) }}</td>
+                        <td>R$ {{ "%.2f"|format(row.juros) }}</td>
+                        <td>R$ {{ "%.2f"|format(row.amortizacao) }}</td>
+                        <td>R$ {{ "%.2f"|format(row.saldo_devedor) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if resultados.sam %}
+    <div id="sam-tab" class="tab-content active">
+        <h2>Sistema de Amortização Constante (SAC)</h2>
+        <div class="summary-cards" id="samSummary"></div>
+        <div class="chart-container">
+            <canvas id="samChart"></canvas>
+        </div>
+        <div class="table-container">
+            <table id="samTable">
+                <thead>
+                    <tr>
+                        <th>Parcela</th>
+                        <th>Prestação</th>
+                        <th>Juros</th>
+                        <th>Amortização</th>
+                        <th>Saldo Devedor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in resultados.sam %}
                     <tr>
                         <td>{{ row.parcela }}</td>
                         <td>R$ {{ "%.2f"|format(row.prestacao) }}</td>
@@ -109,9 +149,43 @@
     </div>
     {% endif %}
 
-    {% if resultados.sac and resultados.price %}
+    {% if resultados.pagamento_variavel %}
+        <div id="pagamento_variavel-tab" class="tab-content active">
+            <h2>Sistema de Amortização Constante (Pagamento Variavel)</h2>
+            <div class="summary-cards" id="pagamento_variavelSummary"></div>
+            <div class="chart-container">
+                <canvas id="pagamento_variavelChart"></canvas>
+            </div>
+            <div class="table-container">
+                <table id="pagamento_variavelTable">
+                    <thead>
+                        <tr>
+                            <th>Parcela</th>
+                            <th>Prestação</th>
+                            <th>Juros</th>
+                            <th>Amortização</th>
+                            <th>Saldo Devedor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in resultados.pagamento_variavel %}
+                        <tr>
+                            <td>{{ row.parcela }}</td>
+                            <td>R$ {{ "%.2f"|format(row.prestacao) }}</td>
+                            <td>R$ {{ "%.2f"|format(row.juros) }}</td>
+                            <td>R$ {{ "%.2f"|format(row.amortizacao) }}</td>
+                            <td>R$ {{ "%.2f"|format(row.saldo_devedor) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    {% if resultados.sac and resultados.price and resultados.sam and resultados.pagamento_variavel %}
     <div id="comparison-tab" class="tab-content">
-        <h2>Comparação SAC vs Price</h2>
+        <h2>Comparação SAC vs Price vs SAM vs Pagamento Variavel</h2>
         <div class="chart-container">
             <canvas id="comparisonChart"></canvas>
         </div>

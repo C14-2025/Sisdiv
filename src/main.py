@@ -8,6 +8,7 @@ import sqlite3
 import os
 from datetime import datetime
 from src.calculadoras.calcular_sac import calcular_sac
+from src.calculadoras.calcular_sam import calcular_sam
 from src.calculadoras.calcular_price import calcular_price
 from src.calculadoras.calculo_pagamento_variavel import calculo_pagamento_variavel
 from src.calculadoras.comparacao_SELIC import simular_comparacao_SELIC
@@ -88,6 +89,10 @@ def calcular_resultados_amortizacao(valor, taxa_decimal, prazo, carencia=0, meto
         resultados["sac"] = calcular_sac(valor, taxa_decimal, prazo, carencia, temcarencia)
     if metodo in ["price", "ambos"]:
         resultados["price"] = calcular_price(valor, taxa_decimal, prazo, carencia, temcarencia)
+    if metodo in ["sam", "ambos"]:
+        resultados["sam"] = calcular_sam(valor, taxa_decimal, prazo, carencia, temcarencia)
+    if metodo in ["pagamento_variavel", "ambos"]:
+        resultados["pagamento_variavel"] = calculo_pagamento_variavel(valor, taxa_decimal, prazo, carencia, temcarencia)
     return resultados
 
 @app.post("/calcular/")

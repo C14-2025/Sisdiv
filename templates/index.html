@@ -36,8 +36,10 @@
             <div class="form-group">
                 <label for="metodo">Método de Amortização</label>
                 <select id="metodo" name="metodo">
-                    <option value="ambos">SAC e Price</option>
+                    <option value="ambos">SAC, Price, SAM e Pagamento Variavel</option>
                     <option value="sac">SAC</option>
+                    <option value="sam">SAM</option>
+                    <option value="pagamento_variavel">Pagamento Variavel</option>
                     <option value="price">Price</option>
                 </select>
             </div>
@@ -55,6 +57,8 @@
     <div class="results-tabs">
         <button class="tab-button active" onclick="showTab('sac')">📉 SAC</button>
         <button class="tab-button" onclick="showTab('price')">📊 Price</button>
+        <button class="tab-button" onclick="showTab('sam')">📊 SAM</button>
+        <button class="tab-button" onclick="showTab('pagamento_variavel')">📊 Pagamento Variavel</button>
         <button class="tab-button" onclick="showTab('comparison')">⚖️ Comparação</button>
     </div>
 
@@ -89,8 +93,38 @@
         </div>
     </div>
 
+    <div id="sam-tab" class="tab-content">
+        <h2>Tabela SAM</h2>
+        <div class="summary-cards" id="samSummary"></div>
+        <div class="chart-container">
+            <canvas id="samChart"></canvas>
+        </div>
+        <div class="table-container">
+            <table id="samTable"></table>
+        </div>
+        <div class="export-buttons">
+            <button class="btn-export" onclick="exportToCSV('sam')">📄 Exportar CSV</button>
+            <button class="btn-export" onclick="exportToPDF('sam')">📋 Exportar PDF</button>
+        </div>
+    </div>
+
+    <div id="pagamento_variavel-tab" class="tab-content">
+        <h2>Tabela Pagamento Variavel</h2>
+        <div class="summary-cards" id="pagamento_variavelSummary"></div>
+        <div class="chart-container">
+            <canvas id="pagamento_variavelChart"></canvas>
+        </div>
+        <div class="table-container">
+            <table id="pagamento_variavelTable"></table>
+        </div>
+        <div class="export-buttons">
+            <button class="btn-export" onclick="exportToCSV('pagamento_variavel')">📄 Exportar CSV</button>
+            <button class="btn-export" onclick="exportToPDF('pagamento_variavel')">📋 Exportar PDF</button>
+        </div>
+    </div>
+
     <div id="comparison-tab" class="tab-content">
-        <h2>Comparação SAC vs Price</h2>
+        <h2>Comparação SAC vs Price vs SAM vs Pagamento Variavel</h2>
         <div class="chart-container">
             <canvas id="comparisonChart"></canvas>
         </div>
