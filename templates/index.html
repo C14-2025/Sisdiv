@@ -1,18 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Seção de Exemplo -->
-<!--
-<div class="example-section">
-    <h3>📊 Exemplo Prático</h3>
-    <p><strong>Cenário:</strong> Financiamento de R$ 100.000,00 a 1% ao mês por 12 parcelas</p>
-    <p><strong>SAC:</strong> Parcelas decrescentes começando em R$ 9.333,33</p>
-    <p><strong>Price:</strong> Parcelas fixas de R$ 8.884,88</p>
-    <p>Use os valores abaixo ou insira seus próprios dados!</p>
-</div>
--->
-
-<!-- Seção de Input -->
 <div class="input-section">
     <h2>📝 Dados do Financiamento</h2>
     <form id="simulacaoForm">
@@ -33,9 +21,16 @@
                 <label for="carencia">Carência (meses)</label>
                 <input type="number" id="carencia" name="carencia" value="null" min="0">
             </div>
+
+            <div class="form-group hidden-field" id="amortizacoesGroup" style="display: none;">
+                <label for="amortizacoes_input">Lista de Amortizações (separadas por vírgula)</label>
+                <textarea id="amortizacoes_input" rows="3" placeholder="Ex: 8000.00, 7500.00, 7000.00, ..."></textarea>
+                <input type="hidden" id="amortizacoes_json" name="amortizacoes_json">
+            </div>
+
             <div class="form-group">
                 <label for="metodo">Método de Amortização</label>
-                <select id="metodo" name="metodo">
+                <select id="metodo" name="metodo" onchange="toggleAmortizacoesInput()">
                     <option value="ambos">SAC, Price, SAM e Pagamento Variavel</option>
                     <option value="sac">SAC</option>
                     <option value="sam">SAM</option>
@@ -52,7 +47,6 @@
     </form>
 </div>
 
-<!-- Seção de Resultados -->
 <div class="results-section" id="resultsSection" style="display: none;">
     <div class="results-tabs">
         <button class="tab-button active" onclick="showTab('sac')">📉 SAC</button>
@@ -131,4 +125,112 @@
         <div class="summary-cards" id="comparisonSummary"></div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Assume-se que o código de submissão do formulário está em script.js,
+        // mas adicionamos o listener aqui para a submissão.
+        const form = document.getElementById('simulacaoForm');
+        form.addEventListener('submit', handleFormSubmit);
+
+        // Garante que o campo de amortização esteja oculto no carregamento
+        toggleAmortizacoesInput();
+    });
+
+    // Função para mostrar/esconder o campo de amortizações
+    function toggleAmortizacoesInput() {
+        const metodo = document.getElementById('metodo').value;
+        const amortizacoesGroup = document.getElementById('amortizacoesGroup');
+        const amortizacoesInput = document.getElementById('amortizacoes_input');
+
+        // Exibe o campo se o método for Pagamento Variável ou Ambos
+        if (metodo === 'pagamento_variavel' || metodo === 'ambos') {
+            amortizacoesGroup.style.display = 'block';
+            amortizacoesInput.setAttribute('required', 'required');
+            document.getElementById('prazo').removeAttribute('required'); // Prazo não é estritamente necessário se amortizações for fornecido
+        } else {
+            amortizacoesGroup.style.display = 'none';
+            amortizacoesInput.removeAttribute('required');
+            document.getElementById('prazo').setAttribute('required', 'required');
+            // Limpa o campo hidden e o textarea para não enviar dados desnecessários
+            document.getElementById('amortizacoes_json').value = '';
+            amortizacoesInput.value = '';
+        }
+    }
+
+    // Função que lida com a submissão do formulário e prepara o campo amortizacoes_json
+    async function handleFormSubmit(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const metodo = formData.get('metodo');
+
+        const resultsSection = document.getElementById('resultsSection');
+        resultsSection.style.display = 'none'; // Esconde resultados antigos
+
+        // Lógica de Pagamento Variável
+        if (metodo === 'pagamento_variavel' || metodo === 'ambos') {
+            const amortizacoesInput = document.getElementById('amortizacoes_input').value;
+            const amortizacoesJsonField = document.getElementById('amortizacoes_json');
+
+            // 1. Processa a string de amortizações (separada por vírgulas)
+            const amortizacoesArray = amortizacoesInput
+                .split(',')
+                .map(s => s.trim()) // Remove espaços em branco
+                .filter(s => s.length > 0) // Remove strings vazias
+                .map(s => parseFloat(s)); // Converte para número float
+
+            // 2. Valida se todos os elementos são números válidos
+            if (amortizacoesArray.some(isNaN)) {
+                alert('Erro: A lista de amortizações contém valores não numéricos. Por favor, insira apenas números separados por vírgula.');
+                return;
+            }
+
+            // 3. Serializa a lista de números para JSON e a coloca no campo hidden
+            amortizacoesJsonField.value = JSON.stringify(amortizacoesArray);
+
+            // 4. Adiciona o campo hidden ao FormData antes de submeter
+            formData.append('amortizacoes_json', amortizacoesJsonField.value);
+
+            // O campo 'prazo' é definido automaticamente pelo tamanho da lista de amortizações
+            // na função Python, mas o formulário ainda pode exigir um valor para os outros métodos.
+            // Para 'Pagamento Variavel', o 'prazo' no input HTML pode ser ignorado ou usado como
+            // uma validação de consistência. No backend, ele é ignorado para este método.
+        }
+
+
+        // Submissão via Fetch API (Assumindo que essa é a maneira como o seu site envia dados)
+        try {
+            const response = await fetch('/calcular/', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                // Se houver erro HTTP (400, 500, etc.)
+                alert(`Erro no cálculo: ${data.detail || 'Ocorreu um erro desconhecido.'}`);
+                return;
+            }
+
+            // Assumindo que você tem uma função 'renderResults' em 'script.js'
+            if (typeof renderResults === 'function') {
+                 // Esta função deve estar definida em seu script.js para exibir a tabela
+                 renderResults(data);
+            } else {
+                console.error("Função renderResults não encontrada. Resultados calculados:", data);
+                // Exibe a seção de resultados manualmente para indicar sucesso
+                resultsSection.style.display = 'block';
+            }
+
+            // Resto da lógica de exibição de resultados...
+
+        } catch (error) {
+            console.error('Erro de rede ou na requisição:', error);
+            alert('Erro de comunicação com o servidor.');
+        }
+    }
+</script>
 {% endblock %}

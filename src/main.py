@@ -77,6 +77,8 @@ async def read_root(request: Request):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao carregar página inicial: {str(e)}"
         )
+
+
 def calcular_resultados_amortizacao(valor, taxa_decimal, prazo, carencia=0, metodo="ambos", temcarencia=None):
     """
     Calcula os resultados de amortização para SAC, Price ou ambos.
@@ -94,6 +96,7 @@ def calcular_resultados_amortizacao(valor, taxa_decimal, prazo, carencia=0, meto
     if metodo in ["pagamento_variavel", "ambos"]:
         resultados["pagamento_variavel"] = calculo_pagamento_variavel(valor, taxa_decimal, prazo, carencia, temcarencia)
     return resultados
+
 
 @app.post("/calcular/")
 async def calcular_amortizacao(
@@ -119,10 +122,10 @@ async def calcular_amortizacao(
 
 @app.post("/investimentos/")
 def simular_investimentos(
-    valor_investido: float = Form(...),
-    prazo_anos: int = Form(...),
-    percentual_base: dict = Form(...),
-    taxa_atual_SELIC: Optional[float] = Form(None)
+        valor_investido: float = Form(...),
+        prazo_anos: int = Form(...),
+        percentual_base: dict = Form(...),
+        taxa_atual_SELIC: Optional[float] = Form(None)
 ):
     """
     Simula diferentes tipos de investimentos com base na taxa SELIC atual
@@ -147,6 +150,7 @@ def simular_investimentos(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail=f"Erro na simulação de investimentos: {str(e)}")
+
 
 @app.get("/simulacoes/", response_class=HTMLResponse)
 async def listar_simulacoes(request: Request, db: sqlite3.Connection = Depends(get_db)):
@@ -199,7 +203,7 @@ async def ver_simulacao(request: Request, simulacao_id: int, db: sqlite3.Connect
         resultados = calcular_resultados_amortizacao(
             simulacao[1], taxa_decimal, simulacao[3], simulacao[4], simulacao[5], temcarencia
         )
-        
+
         return templates.TemplateResponse("amortizacao.html", {
             "request": request,
             "valor": simulacao[1],
@@ -215,6 +219,7 @@ async def ver_simulacao(request: Request, simulacao_id: int, db: sqlite3.Connect
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao carregar simulação: {str(e)}"
         )
+
 
 @app.post("/simulacao/{simulacao_id}/delete")
 async def deletar_simulacao(simulacao_id: int, db: sqlite3.Connection = Depends(get_db)):
@@ -234,15 +239,16 @@ async def deletar_simulacao(simulacao_id: int, db: sqlite3.Connection = Depends(
             status_code=500,
             detail=f"Erro ao deletar simulação: {str(e)}"
         )
-    
+
+
 @app.post("/salvar_simulacao")
 async def salvar_simulacao(
-    valor: float = Form(...),
-    taxa: float = Form(...),
-    prazo: int = Form(...),
-    carencia: int = Form(...),
-    metodo: str = Form(...),
-    db: sqlite3.Connection = Depends(get_db)
+        valor: float = Form(...),
+        taxa: float = Form(...),
+        prazo: int = Form(...),
+        carencia: int = Form(...),
+        metodo: str = Form(...),
+        db: sqlite3.Connection = Depends(get_db)
 ):
     try:
         cursor = db.cursor()
@@ -259,6 +265,7 @@ async def salvar_simulacao(
             status_code=500,
             detail=f"Erro ao salvar simulação: {str(e)}"
         )
+
 
 # --- ROTA DE HEALTH CHECK ---
 @app.get("/healthcheck")
@@ -287,4 +294,3 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
-
