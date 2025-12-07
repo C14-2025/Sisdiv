@@ -91,9 +91,9 @@ def calcular_resultados_amortizacao(valor, taxa_decimal, prazo, carencia=0, meto
         resultados["sac"] = calcular_sac(valor, taxa_decimal, prazo, carencia, temcarencia)
     if metodo in ["price", "ambos"]:
         resultados["price"] = calcular_price(valor, taxa_decimal, prazo, carencia, temcarencia)
-    if metodo in ["sam", "ambos"]:
+    if metodo in ["sam"]:
         resultados["sam"] = calcular_sam(valor, taxa_decimal, prazo, carencia, temcarencia)
-    if metodo in ["pagamento_variavel", "ambos"]:
+    if metodo in ["pagamento_variavel"]:
         resultados["pagamento_variavel"] = calculo_pagamento_variavel(valor, taxa_decimal, prazo, carencia, temcarencia)
     return resultados
 

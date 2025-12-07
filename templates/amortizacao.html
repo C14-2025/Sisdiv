@@ -42,7 +42,7 @@
         {% if resultados.pagamento_variavel %}
         <button class="tab-button" onclick="showTab('pagamento variavel')">📊 Pagamento Variavel</button>
         {% endif %}
-        {% if resultados.sac and resultados.price % and resultados.sam and resultados.pagamento_variavel}
+        {% if resultados.sac and resultados.price %}
         <button class="tab-button" onclick="showTab('comparison')">⚖️ Comparação</button>
         {% endif %}
     </div>
@@ -183,9 +183,9 @@
         </div>
         {% endif %}
 
-    {% if resultados.sac and resultados.price and resultados.sam and resultados.pagamento_variavel %}
+    {% if resultados.sac and resultados.price %}
     <div id="comparison-tab" class="tab-content">
-        <h2>Comparação SAC vs Price vs SAM vs Pagamento Variavel</h2>
+        <h2>Comparação SAC vs Price</h2>
         <div class="chart-container">
             <canvas id="comparisonChart"></canvas>
         </div>
