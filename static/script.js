@@ -3,8 +3,13 @@
 // Variáveis globais
 let sacData = [];
 let priceData = [];
+let samData = [];
+let pagamento_variavelData = [];
+
 let sacChartInstance = null;
 let priceChartInstance = null;
+let samChartInstance = null;
+let pagamento_variavelChartInstance = null;
 let comparisonChartInstance = null;
 
 // Inicialização quando o documento estiver carregado
@@ -19,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Se já existem dados carregados (amortizacao.html), criar gráficos
-    if (typeof sacData !== 'undefined' && (sacData.length > 0 || priceData.length > 0)) {
+    if (typeof sacData !== 'undefined' && (sacData.length > 0 || priceData.length > 0 || samData.length > 0 || pagamento_variavelData.length > 0)) {
         criarResumos();
         criarGraficos();
     }
@@ -39,42 +44,86 @@ async function calcular() {
         return;
     }
 
+    const formData = new FormData();
+    formData.append('valor', valor);
+    formData.append('taxa', taxa);
+    formData.append('prazo', prazo);
+    formData.append('carencia', carencia);
+    formData.append('metodo', metodo);
+
+    if (metodo === 'pagamento_variavel') {
+        const amortizacoesInput = document.getElementById('amortizacoes_input').value;
+        const amortizacoesArray = amortizacoesInput
+            .split(',')
+            .map(s => s.trim())
+            .filter(s => s.length > 0)
+            .map(parseFloat);
+
+        if (amortizacoesArray.some(isNaN) || amortizacoesArray.length === 0) {
+            alert('Erro: A lista de amortizações está vazia ou contém valores não numéricos.');
+            return;
+        }
+
+        formData.append('amortizacoes_json', JSON.stringify(amortizacoesArray));
+        formData.set('prazo', amortizacoesArray.length);
+    }
+
+
     try {
         // Fazer requisição para o backend
-        const formData = new FormData();
-        formData.append('valor', valor);
-        formData.append('taxa', taxa);
-        formData.append('prazo', prazo);
-        formData.append('carencia', carencia);
-        formData.append('metodo', metodo);
-
         const response = await fetch('/calcular/', {
             method: 'POST',
             body: formData
         });
 
         if (!response.ok) {
-            throw new Error('Erro no servidor: ' + response.status);
+            const errorData = await response.json();
+            throw new Error('Erro no servidor: ' + (errorData.detail || response.status));
         }
 
         const data = await response.json();
         console.log('Dados recebidos:', data);
 
-        // Processar os dados recebidos
+        // Processar os dados recebidos (CORRIGIDO: usa as variáveis globais)
         if (data.sac) {
             sacData = data.sac;
             criarTabelaSAC();
+        } else {
+            sacData = []; // Limpa
         }
 
         if (data.price) {
             priceData = data.price;
             criarTabelaPrice();
+        } else {
+            priceData = []; // Limpa
         }
 
-        if (data.sac || data.price) {
+        if (data.sam) {
+            samData = data.sam;
+            criarTabelaSAM();
+        } else {
+            samData = []; // Limpa
+        }
+
+        if (data.pagamento_variavel) {
+            pagamento_variavelData = data.pagamento_variavel;
+            criarTabelapagamento_variavel();
+        } else {
+            pagamento_variavelData = []; // Limpa
+        }
+
+        // Criar resumos e gráficos se houver dados
+        if (sacData.length > 0 || priceData.length > 0 || samData.length > 0 || pagamento_variavelData.length > 0) {
             criarResumos();
             criarGraficos();
             document.getElementById('resultsSection').style.display = 'block';
+
+            // Ativa a primeira aba disponível
+            let defaultTab = sacData.length > 0 ? 'sac' : priceData.length > 0 ? 'price' : samData.length > 0 ? 'sam' : 'pagamento_variavel';
+            showTab(defaultTab);
+        } else {
+             document.getElementById('resultsSection').style.display = 'none';
         }
 
     } catch (error) {
@@ -83,7 +132,7 @@ async function calcular() {
     }
 }
 
-// Funções para criar tabelas
+// Funções para criar tabelas (mantidas inalteradas)
 function criarTabelaSAC() {
     const table = document.getElementById('sacTable');
     if (!table) return;
@@ -105,10 +154,10 @@ function criarTabelaSAC() {
         html += `
             <tr>
                 <td>${row.parcela}</td>
-                <td>R$ ${row.prestacao.toFixed(2)}</td>
-                <td>R$ ${row.juros.toFixed(2)}</td>
-                <td>R$ ${row.amortizacao.toFixed(2)}</td>
-                <td>R$ ${row.saldo_devedor.toFixed(2)}</td>
+                <td>R$ ${row.prestacao.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${row.juros.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${row.amortizacao.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${row.saldo_devedor.toFixed(2).replace('.', ',')}</td>
             </tr>
         `;
     });
@@ -138,10 +187,76 @@ function criarTabelaPrice() {
         html += `
             <tr>
                 <td>${row.parcela}</td>
-                <td>R$ ${row.prestacao.toFixed(2)}</td>
-                <td>R$ ${row.juros.toFixed(2)}</td>
-                <td>R$ ${row.amortizacao.toFixed(2)}</td>
-                <td>R$ ${row.saldo_devedor.toFixed(2)}</td>
+                <td>R$ ${row.prestacao.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${row.juros.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${row.amortizacao.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${row.saldo_devedor.toFixed(2).replace('.', ',')}</td>
+            </tr>
+        `;
+    });
+
+    html += '</tbody>';
+    table.innerHTML = html;
+}
+
+function criarTabelaSAM() {
+    const table = document.getElementById('samTable');
+    if (!table) return;
+
+    let html = `
+        <thead>
+            <tr>
+                <th>Parcela</th>
+                <th>Prestação</th>
+                <th>Juros</th>
+                <th>Amortização</th>
+                <th>Saldo Devedor</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
+
+    samData.forEach(row => {
+        html += `
+            <tr>
+                <td>${row.parcela}</td>
+                <td>R$ ${row.prestacao.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${row.juros.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${row.amortizacao.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${row.saldo_devedor.toFixed(2).replace('.', ',')}</td>
+            </tr>
+        `;
+    });
+
+    html += '</tbody>';
+    table.innerHTML = html;
+}
+
+function criarTabelapagamento_variavel() {
+    const table = document.getElementById('pagamento_variavelTable');
+    if (!table) return;
+
+    let html = `
+        <thead>
+            <tr>
+                <th>Parcela</th>
+                <th>Prestação</th>
+                <th>Juros</th>
+                <th>Amortização</th>
+                <th>Saldo Devedor</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
+
+    pagamento_variavelData.forEach(row => {
+        html += `
+            <tr>
+                <td>${row.parcela}</td>
+                <td>R$ ${row.prestacao.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${row.juros.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${row.amortizacao.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${row.saldo_devedor.toFixed(2).replace('.', ',')}</td>
             </tr>
         `;
     });
@@ -153,58 +268,59 @@ function criarTabelaPrice() {
 // ------------------ Funções de Resumos e Gráficos ------------------
 
 function criarResumos() {
-    // Resumo SAC
-    if (sacData.length > 0 && document.getElementById('sacSummary')) {
-        const totalPrestacoesSAC = sacData.reduce((sum, row) => sum + row.prestacao, 0);
-        const totalJurosSAC = sacData.reduce((sum, row) => sum + row.juros, 0);
-        const totalAmortizacaoSAC = sacData.reduce((sum, row) => sum + row.amortizacao, 0);
+    // Função auxiliar para criar card de resumo
+    function createSummaryCards(data, summaryId, fixedLabel) {
+        if (!data || data.length === 0 || !document.getElementById(summaryId)) return;
 
-        document.getElementById('sacSummary').innerHTML = `
-            <div class="summary-card"><h3>Total de Prestações</h3><div class="value">R$ ${totalPrestacoesSAC.toFixed(2)}</div></div>
-            <div class="summary-card"><h3>Total de Juros</h3><div class="value">R$ ${totalJurosSAC.toFixed(2)}</div></div>
-            <div class="summary-card"><h3>Total Amortizado</h3><div class="value">R$ ${totalAmortizacaoSAC.toFixed(2)}</div></div>
-            <div class="summary-card"><h3>Primeira Prestação</h3><div class="value">R$ ${sacData[0]?.prestacao.toFixed(2) || '0.00'}</div></div>
+        const totalPrestacoes = data.reduce((sum, row) => sum + row.prestacao, 0);
+        const totalJuros = data.reduce((sum, row) => sum + row.juros, 0);
+        const totalAmortizacao = data.reduce((sum, row) => sum + row.amortizacao, 0);
+
+        const firstValue = data.find(row => row.amortizacao > 0 || row.prestacao > 0)?.prestacao.toFixed(2).replace('.', ',') || '0.00';
+
+        document.getElementById(summaryId).innerHTML = `
+            <div class="summary-card"><h3>Total de Prestações</h3><div class="value">R$ ${totalPrestacoes.toFixed(2).replace('.', ',')}</div></div>
+            <div class="summary-card"><h3>Total de Juros</h3><div class="value">R$ ${totalJuros.toFixed(2).replace('.', ',')}</div></div>
+            <div class="summary-card"><h3>Total Amortizado</h3><div class="value">R$ ${totalAmortizacao.toFixed(2).replace('.', ',')}</div></div>
+            <div class="summary-card"><h3>${fixedLabel}</h3><div class="value">R$ ${firstValue}</div></div>
         `;
     }
 
-    // Resumo Price
-    if (priceData.length > 0 && document.getElementById('priceSummary')) {
-        const totalPrestacoes = priceData.reduce((sum, row) => sum + row.prestacao, 0);
-        const totalJuros = priceData.reduce((sum, row) => sum + row.juros, 0);
-        const totalAmortizacao = priceData.reduce((sum, row) => sum + row.amortizacao, 0);
+    // Resumos Individuais
+    createSummaryCards(sacData, 'sacSummary', 'Primeira Prestação');
+    createSummaryCards(priceData, 'priceSummary', 'Prestação Fixa');
+    createSummaryCards(samData, 'samSummary', 'Prestação Juros');
+    createSummaryCards(pagamento_variavelData, 'pagamento_variavelSummary', 'Primeira Prestação');
 
-        document.getElementById('priceSummary').innerHTML = `
-            <div class="summary-card"><h3>Total de Prestações</h3><div class="value">R$ ${totalPrestacoes.toFixed(2)}</div></div>
-            <div class="summary-card"><h3>Total de Juros</h3><div class="value">R$ ${totalJuros.toFixed(2)}</div></div>
-            <div class="summary-card"><h3>Total Amortizado</h3><div class="value">R$ ${totalAmortizacao.toFixed(2)}</div></div>
-            <div class="summary-card"><h3>Prestação Fixa</h3><div class="value">R$ ${priceData.find(row => row.amortizacao > 0)?.prestacao.toFixed(2) || '0.00'}</div></div>
-        `;
-    }
 
-    // Comparação
-    if (sacData.length > 0 && priceData.length > 0 && document.getElementById('comparisonSummary')) {
+    // **CORREÇÃO:** Comparação APENAS SAC vs Price
+    const comparisonSummary = document.getElementById('comparisonSummary');
+    if (comparisonSummary && sacData.length > 0 && priceData.length > 0) {
+
         const totalPrestacoesSAC = sacData.reduce((sum, row) => sum + row.prestacao, 0);
         const totalJurosSAC = sacData.reduce((sum, row) => sum + row.juros, 0);
         const totalPrestacoesPrice = priceData.reduce((sum, row) => sum + row.prestacao, 0);
         const totalJurosPrice = priceData.reduce((sum, row) => sum + row.juros, 0);
 
-        const economia = totalPrestacoesPrice - totalPrestacoesSAC;
-        document.getElementById('comparisonSummary').innerHTML = `
-            <div class="summary-card"><h3>Economia com SAC</h3><div class="value">R$ ${economia.toFixed(2)}</div></div>
-            <div class="summary-card"><h3>Diferença de Juros</h3><div class="value">R$ ${(totalJurosPrice - totalJurosSAC).toFixed(2)}</div></div>
-            <div class="summary-card"><h3>Melhor Método</h3><div class="value">${economia > 0 ? 'SAC' : 'Price'}</div></div>
+        const economia = totalPrestacoesPrice - totalPrestacoesSAC; // Comparação de Prestação Total
+        const melhorMetodo = economia > 0 ? 'SAC' : (economia < 0 ? 'Price' : 'Empate');
+
+        comparisonSummary.innerHTML = `
+            <div class="summary-card"><h3>Economia com SAC (Total Prest.)</h3><div class="value">R$ ${economia.toFixed(2).replace('.', ',')}</div></div>
+            <div class="summary-card"><h3>Diferença de Juros (Price - SAC)</h3><div class="value">R$ ${(totalJurosPrice - totalJurosSAC).toFixed(2).replace('.', ',')}</div></div>
+            <div class="summary-card"><h3>Melhor Método (Menor Prest. Total)</h3><div class="value">${melhorMetodo}</div></div>
         `;
+    } else if (comparisonSummary) {
+         // Garante que a seção de comparação limpa se não tiver os dois, para evitar dados incorretos ou incompletos.
+         comparisonSummary.innerHTML = '<h2>Comparação</h2><p>Calcule os métodos SAC e Price para ver a comparação detalhada.</p>';
     }
 }
 
 function criarGraficos() {
-    // Gráfico SAC
+    // Gráficos Individuais (Mantidos inalterados)
     if (sacData.length > 0 && document.getElementById('sacChart')) {
         const ctxSAC = document.getElementById('sacChart').getContext('2d');
-        // Remove anterior se ela existir
-        if (sacChartInstance) {
-            sacChartInstance.destroy();
-        }
+        if (sacChartInstance) { sacChartInstance.destroy(); }
         sacChartInstance = new Chart(ctxSAC, {
             type: 'line',
             data: {
@@ -219,13 +335,9 @@ function criarGraficos() {
         });
     }
 
-    // Gráfico Price
     if (priceData.length > 0 && document.getElementById('priceChart')) {
         const ctxPrice = document.getElementById('priceChart').getContext('2d');
-        // Remove anterior se ela existir
-        if (priceChartInstance) {
-            priceChartInstance.destroy();
-        }
+        if (priceChartInstance) { priceChartInstance.destroy(); }
         priceChartInstance = new Chart(ctxPrice, {
             type: 'line',
             data: {
@@ -240,47 +352,113 @@ function criarGraficos() {
         });
     }
 
-    // Gráfico Comparação
-    if (sacData.length > 0 && priceData.length > 0 && document.getElementById('comparisonChart')) {
+    if (samData.length > 0 && document.getElementById('samChart')) {
+        const ctxSAM = document.getElementById('samChart').getContext('2d');
+        if (samChartInstance) { samChartInstance.destroy(); }
+        samChartInstance = new Chart(ctxSAM, {
+            type: 'line',
+            data: {
+                labels: samData.map(row => `Parcela ${row.parcela}`),
+                datasets: [
+                    { label: 'Prestação', data: samData.map(row => row.prestacao), borderColor: '#3498db', backgroundColor: 'rgba(52, 152, 219, 0.1)', tension: 0.4 },
+                    { label: 'Juros', data: samData.map(row => row.juros), borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.1)', tension: 0.4 },
+                    { label: 'Amortização', data: samData.map(row => row.amortizacao), borderColor: '#2ecc71', backgroundColor: 'rgba(46, 204, 113, 0.1)', tension: 0.4 }
+                ]
+            },
+            options: { responsive: true, plugins: { title: { display: true, text: 'Evolução das Parcelas - SAM' } } }
+        });
+    }
+
+    if (pagamento_variavelData.length > 0 && document.getElementById('pagamento_variavelChart')) {
+        const ctxPV = document.getElementById('pagamento_variavelChart').getContext('2d');
+        if (pagamento_variavelChartInstance) { pagamento_variavelChartInstance.destroy(); }
+        pagamento_variavelChartInstance = new Chart(ctxPV, {
+            type: 'line',
+            data: {
+                labels: pagamento_variavelData.map(row => `Parcela ${row.parcela}`),
+                datasets: [
+                    { label: 'Prestação', data: pagamento_variavelData.map(row => row.prestacao), borderColor: '#f1c40f', backgroundColor: 'rgba(241, 196, 15, 0.1)', tension: 0.4 },
+                    { label: 'Juros', data: pagamento_variavelData.map(row => row.juros), borderColor: '#9b59b6', backgroundColor: 'rgba(155, 89, 182, 0.1)', tension: 0.4 },
+                    { label: 'Amortização', data: pagamento_variavelData.map(row => row.amortizacao), borderColor: '#1abc9c', backgroundColor: 'rgba(26, 188, 156, 0.1)', tension: 0.4 }
+                ]
+            },
+            options: { responsive: true, plugins: { title: { display: true, text: 'Evolução das Parcelas - Pagamento Variavel' } } }
+        });
+    }
+
+
+    // **CORREÇÃO:** Gráfico Comparação SAC vs Price (APENAS SAC e Price, Título Fixo)
+    if (document.getElementById('comparisonChart') && sacData.length > 0 && priceData.length > 0) {
+        const datasets = [];
+        const labels = ['Total Prestações', 'Total Juros', 'Total Amortização'];
+
+        // APENAS adiciona SAC e Price nos datasets
+        datasets.push({ label: 'SAC', data: [sacData.reduce((s, r) => s + r.prestacao, 0), sacData.reduce((s, r) => s + r.juros, 0), sacData.reduce((s, r) => s + r.amortizacao, 0)], backgroundColor: 'rgba(102, 126, 234, 0.8)' });
+        datasets.push({ label: 'Price', data: [priceData.reduce((s, r) => s + r.prestacao, 0), priceData.reduce((s, r) => s + r.juros, 0), priceData.reduce((s, r) => s + r.amortizacao, 0)], backgroundColor: 'rgba(255, 107, 107, 0.8)' });
+
+        // Cria o gráfico
         const ctxComparison = document.getElementById('comparisonChart').getContext('2d');
-        // Remove anterior se ela existir
         if (comparisonChartInstance) {
             comparisonChartInstance.destroy();
         }
         comparisonChartInstance = new Chart(ctxComparison, {
             type: 'bar',
             data: {
-                labels: ['Total Prestações', 'Total Juros', 'Total Amortização'],
-                datasets: [
-                    { label: 'SAC', data: [sacData.reduce((s, r) => s + r.prestacao, 0), sacData.reduce((s, r) => s + r.juros, 0), sacData.reduce((s, r) => s + r.amortizacao, 0)], backgroundColor: 'rgba(102, 126, 234, 0.8)' },
-                    { label: 'Price', data: [priceData.reduce((s, r) => s + r.prestacao, 0), priceData.reduce((s, r) => s + r.juros, 0), priceData.reduce((s, r) => s + r.amortizacao, 0)], backgroundColor: 'rgba(255, 107, 107, 0.8)' }
-                ]
+                labels: labels,
+                datasets: datasets
             },
-            options: { responsive: true, plugins: { title: { display: true, text: 'Comparação SAC vs Price' } } }
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Comparação SAC vs Price' // Título fixo conforme solicitação
+                    }
+                }
+            }
         });
+    } else if (comparisonChartInstance) {
+        // Destrói o gráfico se ele existe, mas a condição (SAC E Price) não é satisfeita.
+        comparisonChartInstance.destroy();
+        comparisonChartInstance = null;
     }
 }
 
 // Alternar abas
 function showTab(tabName) {
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
 
-    event.target.classList.add('active');
-    document.getElementById(`${tabName}-tab`).classList.add('active');
+    const targetButton = document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`);
+    const targetContent = document.getElementById(`${tabName}-tab`);
+
+    if (targetButton) {
+        targetButton.classList.add('active');
+    }
+    if (targetContent) {
+        targetContent.style.display = 'block';
+    }
 }
 
 // Funções de exportação
 function exportToCSV(tipo) {
-    let data = tipo === 'sac' ? sacData : priceData;
+    let data;
+    switch (tipo) {
+        case 'sac': data = sacData; break;
+        case 'price': data = priceData; break;
+        case 'sam': data = samData; break;
+        case 'pagamento_variavel': data = pagamento_variavelData; break;
+        default: return;
+    }
+
     if (!data.length) return;
 
     let csv = "Parcela,Prestação,Juros,Amortização,Saldo Devedor\n";
     data.forEach(row => {
-        csv += `${row.parcela},${row.prestacao.toFixed(2)},${row.juros.toFixed(2)},${row.amortizacao.toFixed(2)},${row.saldo_devedor.toFixed(2)}\n`;
+        csv += `${row.parcela},${row.prestacao.toFixed(2).replace('.', ',')},${row.juros.toFixed(2).replace('.', ',')},${row.amortizacao.toFixed(2).replace('.', ',')},${row.saldo_devedor.toFixed(2).replace('.', ',')}\n`;
     });
 
-    let blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    let blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
     let link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = `${tipo}_amortizacao.csv`;
@@ -290,24 +468,32 @@ function exportToCSV(tipo) {
 function exportToPDF(tipo) {
     let { jsPDF } = window.jspdf;
     let doc = new jsPDF();
-    let data = tipo === 'sac' ? sacData : priceData;
+    let data;
+    let titulo;
+
+    switch (tipo) {
+        case 'sac': data = sacData; titulo = 'SAC'; break;
+        case 'price': data = priceData; titulo = 'PRICE'; break;
+        case 'sam': data = samData; titulo = 'SAM'; break;
+        case 'pagamento_variavel': data = pagamento_variavelData; titulo = 'PAGAMENTO VARIAVEL'; break;
+        default: return;
+    }
+
     if (!data.length) return;
 
     doc.setFontSize(16);
-    doc.text(`Tabela ${tipo.toUpperCase()} - Amortização`, 14, 15);
+    doc.text(`Tabela ${titulo} - Amortização`, 14, 15);
 
-    // Prepare table headers
     const headers = [
         ["Parcela", "Prestação", "Juros", "Amortização", "Saldo Devedor"]
     ];
 
-    // Prepare table rows
     const rows = data.map(row => [
         row.parcela,
-        `R$ ${row.prestacao.toFixed(2)}`,
-        `R$ ${row.juros.toFixed(2)}`,
-        `R$ ${row.amortizacao.toFixed(2)}`,
-        `R$ ${row.saldo_devedor.toFixed(2)}`
+        `R$ ${row.prestacao.toFixed(2).replace('.', ',')}`,
+        `R$ ${row.juros.toFixed(2).replace('.', ',')}`,
+        `R$ ${row.amortizacao.toFixed(2).replace('.', ',')}`,
+        `R$ ${row.saldo_devedor.toFixed(2).replace('.', ',')}`
     ]);
 
     doc.autoTable({
@@ -319,7 +505,7 @@ function exportToPDF(tipo) {
             cellPadding: 4
         },
         headStyles: {
-            fillColor: [102, 126, 234],  // Azul do seu tema
+            fillColor: [102, 126, 234],
             textColor: 255,
             halign: 'center'
         },
@@ -336,10 +522,12 @@ function exportToPDF(tipo) {
 function limparCampos() {
     document.getElementById('simulacaoForm').reset();
     document.getElementById('resultsSection').style.display = 'none';
+    if (typeof toggleAmortizacoesInput === 'function') {
+        toggleAmortizacoesInput();
+    }
 }
 
 async function salvarSimulacao() {
-    // Reuse the inputs 'fr'om the page
     const valor = parseFloat(document.getElementById('valor').value);
     const taxa = parseFloat(document.getElementById('taxa').value);
     const prazo = parseInt(document.getElementById('prazo').value);
@@ -361,8 +549,14 @@ async function salvarSimulacao() {
 
         if (response.redirected) {
             window.location.href = response.url;
+            return;
+        }
+
+        if (response.ok) {
+            alert("Simulação salva com sucesso!");
         } else {
-            alert("Erro ao salvar simulação.");
+             const data = await response.json();
+             alert(`Erro ao salvar simulação: ${data.detail || 'Ocorreu um erro desconhecido.'}`);
         }
 
     } catch (err) {
