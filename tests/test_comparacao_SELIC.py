@@ -1,7 +1,7 @@
 import pytest
 import src.calculadoras.comparacao_SELIC
 
-def test_simular_comparacao_with_taxa_provided():
+def test_simular_comparacao():
     percentual_base = {"CDB": 0.8, "Poupanca": 0.5}
     prazo_anos = 2
     valor_investido = 1000.0
