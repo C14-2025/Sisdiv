@@ -120,26 +120,25 @@ async def calcular_amortizacao(
         )
 
 
+@app.get("/investimentos")
+def investimentos_page(request: Request):
+    return templates.TemplateResponse("investimentos.html", {"request": request})
+
 @app.post("/investimentos/")
 def simular_investimentos(
-        valor_investido: float = Form(...),
+        tipo: str = Form(...),
+        percentual_base: float = Form(...),
         prazo_anos: int = Form(...),
-        percentual_base: dict = Form(...),
+        valor_investido: float = Form(...),
         taxa_atual_SELIC: Optional[float] = Form(None)
 ):
     """
     Simula diferentes tipos de investimentos com base na taxa SELIC atual
     ou uma taxa fornecida manualmente.
-
-    Exemplo de percentual_base:
-    percentual_base = {
-        "Tesouro Selic": 1.0,
-        "CDB Banco X": 1.1,
-        "LCA Banco Y": 0.95
-    }
     """
     try:
         resultado = simular_comparacao_SELIC(
+            tipo=tipo,
             percentual_base=percentual_base,
             prazo_anos=prazo_anos,
             valor_investido=valor_investido,
@@ -150,7 +149,6 @@ def simular_investimentos(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail=f"Erro na simulação de investimentos: {str(e)}")
-
 
 @app.get("/simulacoes/", response_class=HTMLResponse)
 async def listar_simulacoes(request: Request, db: sqlite3.Connection = Depends(get_db)):
