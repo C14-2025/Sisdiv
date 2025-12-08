@@ -1,5 +1,5 @@
 # calcular_price.py
-
+from src.calculadoras import calcular_price
 from src.calculadoras.carencia import carencia as aplicar_carencia
 
 def calcular_price(valor: float, taxa: float, prazo: int, carencia: int = 0, temcarencia: bool = True):
