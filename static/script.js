@@ -589,6 +589,12 @@ function limparCampos() {
     }
 }
 
+// função para limpar os campos do formulário de investimentos
+function limparCamposInvest() {
+    document.getElementById('investForm').reset();
+    document.getElementById('resultsSection').style.display = 'none';
+}
+
 async function salvarSimulacao() {
     const valor = parseFloat(document.getElementById('valor').value);
     const taxa = parseFloat(document.getElementById('taxa').value);
