@@ -175,13 +175,12 @@ class TestAmortizacao:
         amortizacoes = [500, 500]  # não quita tudo
 
         resultado = calculo_pagamento_variavel(valor, taxa, amortizacoes)
-
         # Deve restar 1000 de saldo
         assert resultado[-1]['saldo_devedor'] == 1000
 
     # ----------------- Testes MOCK -----------------
 
-    @patch("main.sqlite3.connect")  # <-- MOCK do banco SQLite
+    @patch("src.main.sqlite3.connect")  # <-- MOCK do banco SQLite
     def test_database_connection_mock_erro(self, mock_connect):
         """
         Testa como a aplicação lida com falha na conexão com o banco de dados.
@@ -202,7 +201,7 @@ class TestAmortizacao:
         
         mock_connect.assert_called_once()  # ✅ Verifica se o mock foi chamado
 
-    @patch("main.calcular_sac")
+    @patch("src.main.calcular_sac")
     def test_calculo_api_mock_erro(self, mock_calcular_sac):
         """Testa rota /calcular/ simulando erro interno com mock"""
         # Força o mock a lançar uma exceção
@@ -257,7 +256,7 @@ class TestAmortizacao:
         assert response.status_code == 200
         assert "Simulação" in response.text or "valor" in response.text
     
-    def test_simular_comparacao_SELIC():
+    def test_simular_comparacao_SELIC(self):
         percentual_base = {
             "Tesouro Selic": 1.0,
             "CDB": 1.10,

@@ -14,7 +14,7 @@ def test_calcular_sac_com_carencia_mock():
         {"parcela": 2, "prestacao": 50, "juros": 50, "amortizacao": 0, "saldo_devedor": 1000},
     ]
 
-    with patch("calcular_sac.aplicar_carencia", return_value=carencia_resultado) as mock_carencia:
+    with patch("src.calculadoras.calcular_sac.aplicar_carencia", return_value=carencia_resultado) as mock_carencia:
         resultado = calcular_sac(valor, taxa, prazo, periodo_carencia, temcarencia=True)
 
         # Assert
