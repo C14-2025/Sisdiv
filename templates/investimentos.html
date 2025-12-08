@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="input-section">
+    <h2>Dados do investimento</h2>
+    <form id="investForm">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="tipo">Tipo do Investimento</label>
+                <input type="text" id="tipo" name="tipo" required>
+            </div>
+            <div class="form-group">
+                <label for="percentual_base">Percentual base (%)</label>
+                <input type="number" id="percentual_base" name="percentual_base" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="prazo_anos">Prazo (anos)</label>
+                <input type="number" id="prazo_anos" name="prazo_anos" step="1" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="valor_investido">Valor investido (R$)</label>
+                <input type="number" id="valor_investido" name="valor_investido" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="taxa_atual_selic">Taxa atual do Selic (%)</label>
+                <input type="number" id="taxa_atual_selic" name="taxa_atual_selic" step="0.01" min="0">
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" class="btn-calculate">Calcular Investimento</button>
+            <button type="button" class="btn-secondary" onclick="limparCamposInvest()">🗑️ Limpar</button>
+        </div>
+    </form>
+</div>
+
+<div class="results-section" id="resultsSection" style="margin-top:20px; display: none;">
+    <h3>Resultado da Simulação</h3>
+    <p><strong>Rentabilidade total:</strong> <span id="rentabilidade"></span>%</p>
+    <p><strong>Valor final:</strong> R$ <span id="valor_final"></span></p>
+</div>
+{% endblock %}
