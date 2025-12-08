@@ -124,25 +124,6 @@ pipeline {
             }
         }
 
-          stage('Integration Tests') {  
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh """
-                        . "${VENV_DIR}/bin/activate"
-                        pip install pytest pytest-asyncio httpx
-                        pytest tests/test_calcular_sam.py --maxfail=1 --disable-warnings -v
-                        """
-                    } else {
-                        bat """
-                        call "${VENV_DIR}\\Scripts\\activate.bat"
-                        python -m pip install pytest pytest-asyncio httpx
-                        python -m pytest tests\\test_calcular_sam.py --maxfail=1 --disable-warnings -v
-                        """
-                    }
-                }
-            }
-        }
         stage('Run All Tests with Reports') {
             steps {
                 script {
