@@ -293,7 +293,7 @@ function criarResumos() {
     createSummaryCards(pagamento_variavelData, 'pagamento_variavelSummary', 'Primeira Prestação');
 
 
-    // **CORREÇÃO:** Comparação APENAS SAC vs Price
+    // **CORREÇÃO:** Comparação APENAS SAC vs Price, e só exibe se ambos existirem
     const comparisonSummary = document.getElementById('comparisonSummary');
     if (comparisonSummary && sacData.length > 0 && priceData.length > 0) {
 
@@ -302,22 +302,23 @@ function criarResumos() {
         const totalPrestacoesPrice = priceData.reduce((sum, row) => sum + row.prestacao, 0);
         const totalJurosPrice = priceData.reduce((sum, row) => sum + row.juros, 0);
 
-        const economia = totalPrestacoesPrice - totalPrestacoesSAC; // Comparação de Prestação Total
-        const melhorMetodo = economia > 0 ? 'SAC' : (economia < 0 ? 'Price' : 'Empate');
+        // Se o Price for maior que o SAC em prestações totais, a economia com SAC é positiva.
+        const economia = totalPrestacoesPrice - totalPrestacoesSAC;
+        const melhorMetodo = totalPrestacoesSAC < totalPrestacoesPrice ? 'SAC' : (totalPrestacoesPrice < totalPrestacoesSAC ? 'Price' : 'Empate');
 
         comparisonSummary.innerHTML = `
-            <div class="summary-card"><h3>Economia com SAC (Total Prest.)</h3><div class="value">R$ ${economia.toFixed(2).replace('.', ',')}</div></div>
-            <div class="summary-card"><h3>Diferença de Juros (Price - SAC)</h3><div class="value">R$ ${(totalJurosPrice - totalJurosSAC).toFixed(2).replace('.', ',')}</div></div>
-            <div class="summary-card"><h3>Melhor Método (Menor Prest. Total)</h3><div class="value">${melhorMetodo}</div></div>
+            <div class="summary-card"><h3>SAC Juros Totais</h3><div class="value">R$ ${totalJurosSAC.toFixed(2).replace('.', ',')}</div></div>
+            <div class="summary-card"><h3>Price Juros Totais</h3><div class="value">R$ ${totalJurosPrice.toFixed(2).replace('.', ',')}</div></div>
+            <div class="summary-card"><h3>Melhor Método (Menor Juros)</h3><div class="value">${melhorMetodo}</div></div>
         `;
     } else if (comparisonSummary) {
-         // Garante que a seção de comparação limpa se não tiver os dois, para evitar dados incorretos ou incompletos.
+         // Garante que a seção de comparação limpa se não tiver os dois, para atender a regra de "não quero o sac sozinho ou price sozinho".
          comparisonSummary.innerHTML = '<h2>Comparação</h2><p>Calcule os métodos SAC e Price para ver a comparação detalhada.</p>';
     }
 }
 
 function criarGraficos() {
-    // Gráficos Individuais (Mantidos inalterados)
+    // Gráfico SAC
     if (sacData.length > 0 && document.getElementById('sacChart')) {
         const ctxSAC = document.getElementById('sacChart').getContext('2d');
         if (sacChartInstance) { sacChartInstance.destroy(); }
@@ -335,6 +336,7 @@ function criarGraficos() {
         });
     }
 
+    // Gráfico Price
     if (priceData.length > 0 && document.getElementById('priceChart')) {
         const ctxPrice = document.getElementById('priceChart').getContext('2d');
         if (priceChartInstance) { priceChartInstance.destroy(); }
@@ -352,6 +354,7 @@ function criarGraficos() {
         });
     }
 
+    // Gráfico SAM (Mantido)
     if (samData.length > 0 && document.getElementById('samChart')) {
         const ctxSAM = document.getElementById('samChart').getContext('2d');
         if (samChartInstance) { samChartInstance.destroy(); }
@@ -369,6 +372,7 @@ function criarGraficos() {
         });
     }
 
+    // Gráfico Pagamento Variavel (Mantido)
     if (pagamento_variavelData.length > 0 && document.getElementById('pagamento_variavelChart')) {
         const ctxPV = document.getElementById('pagamento_variavelChart').getContext('2d');
         if (pagamento_variavelChartInstance) { pagamento_variavelChartInstance.destroy(); }

@@ -213,6 +213,8 @@
 <script>
     const sacData = {{ resultados.sac | tojson if resultados.sac else '[]' }};
     const priceData = {{ resultados.price | tojson if resultados.price else '[]' }};
+    const samData = {{ resultados.sam | tojson if resultados.sam else '[]' }};
+    const pagamento_variavelData = {{ resultados.pagamento_variavel | tojson if resultados.pagamento_variavel else '[]' }};
 </script>
 {% endblock %}
 
