@@ -13,7 +13,7 @@ def get_taxa_atual_SELIC():
 def simular_comparacao_SELIC(percentual_base: dict,
                              prazo_anos: int,
                              valor_investido: float,
-                             taxa_atual_SELIC: float = None):
+                             taxa_atual_SELIC: float = None): # type: ignore
     
     if taxa_atual_SELIC is None:
         taxa_atual_SELIC = get_taxa_atual_SELIC()
