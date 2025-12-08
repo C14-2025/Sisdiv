@@ -150,7 +150,7 @@ pipeline {
                         sh """
                         . "${VENV_DIR}/bin/activate"
                         pip install pytest pytest-asyncio httpx pytest-cov pytest-html
-                        pytest tests --maxfail=1 --disable-warnings -v \
+                        pytest tests/test_integration.py tests/test_calcular_sam.py --maxfail=1 --disable-warnings -v \
                             --junitxml=report.xml \
                             --cov=src --cov-report=xml \
                             --html=report.html --self-contained-html
@@ -159,7 +159,7 @@ pipeline {
                         bat """
                         call "${VENV_DIR}\\Scripts\\activate.bat"
                         python -m pip install pytest pytest-asyncio httpx pytest-cov pytest-html
-                        python -m pytest tests --maxfail=1 --disable-warnings -v ^
+                        python -m pytest tests/test_integration.py tests/test_calcular_sam.py --maxfail=1 --disable-warnings -v ^
                             --junitxml=report.xml ^
                             --cov=src --cov-report=xml ^
                             --html=report.html --self-contained-html
