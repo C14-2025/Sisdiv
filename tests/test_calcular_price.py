@@ -13,7 +13,7 @@ class TestAmortizacaoPriceComMock:
     """Testes unitários para o sistema de amortização PRICE com mocks."""
 
     # Usa um mock para a função 'carencia' dentro do módulo 'calcular_price'
-    @patch('calcular_price.aplicar_carencia')
+    @patch('src.calculadoras.calcular_price.aplicar_carencia')
     def test_calcular_price_com_carencia_mockada(self, mock_aplicar_carencia: MagicMock):
         """
         Testa o cálculo da tabela PRICE com carência, simulando a função de carência
