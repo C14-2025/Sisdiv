@@ -231,31 +231,42 @@ pipeline {
     }
 
     post {
-        always {
-            archiveArtifacts artifacts: 'dist/**', fingerprint: true
-            archiveArtifacts artifacts: 'logs/**/*.log', fingerprint: true
-            archiveArtifacts artifacts: 'backups/**', fingerprint: true
+    always {
+        archiveArtifacts artifacts: 'dist/**', fingerprint: true
+        archiveArtifacts artifacts: 'logs/**/*.log', fingerprint: true
+        archiveArtifacts artifacts: 'backups/**', fingerprint: true
+        archiveArtifacts artifacts: 'report.html', fingerprint: true
+        archiveArtifacts artifacts: 'report.xml', fingerprint: true
+        archiveArtifacts artifacts: 'coverage.xml', fingerprint: true
 
-            script{
-                currentBuild.description = "Build #${env.BUILD_NUMBER} - ${currentBuild.result}"
-            }
-            
-        }
-        success {
-            echo "Pipeline executada com sucesso!"
-            emailext (
-                subject: "SUCESSO: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "Build executado com sucesso!\nURL: ${env.BUILD_URL}",
-                to: 'teste@gmail.com'
-            )
-        }
-        failure {
-            echo "Pipeline falhou."
-            emailext (
-                subject: "FALHA: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "Build falhou!\nVerifique: ${env.BUILD_URL}",
-                to: 'teste@gmail.com'
-            )
+        publishHTML([
+            allowMissing: false,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: '.',
+            reportFiles: 'report.html',
+            reportName: 'Pytest Report'
+        ])
+
+        script {
+            currentBuild.description = "Build #${env.BUILD_NUMBER} - ${currentBuild.result}"
         }
     }
+    success {
+        echo "Pipeline executada com sucesso!"
+        emailext (
+            subject: "SUCESSO: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            body: "Build executado com sucesso!\nURL: ${env.BUILD_URL}",
+            to: 'teste@gmail.com'
+        )
+    }
+    failure {
+        echo "Pipeline falhou."
+        emailext (
+            subject: "FALHA: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            body: "Build falhou!\nVerifique: ${env.BUILD_URL}",
+            to: 'teste@gmail.com'
+        )
+    }
+}
 }
