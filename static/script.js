@@ -141,6 +141,55 @@ async function calcular() {
     }
 }
 
+// Função para calcular a simulação dos investimentos
+async function simularInvestimentos() {
+    // puxando a entrada do usuário do HTML
+    const tipo = document.getElementById('tipo').value;
+    const percentual_base = parseFloat(document.getElementById('percentual_base').value);
+    const prazo_anos = parseInt(document.getElementById('prazo_anos').value);
+    const valor_investido = parseFloat(document.getElementById('valor_investido').value);
+    const taxa_atual_selic = parseFloat(document.getElementById('taxa_atual_selic').value);
+
+    // taxa atual selic é opcional porque pode ser puxada da API do banco central
+    // verificando se todos os campos obrigatórios foram preenchidos
+    if (!tipo || !percentual_base || !prazo_anos || ! valor_investido){
+        alert('Por favor, preencha todos os campos obrigatórios!');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('tipo', tipo)
+    formData.append('percentual_base', percentual_base)
+    formData.append('prazo_anos', prazo_anos)
+    formData.append('valor_investido', valor_investido)
+    formData.append('taxa_atual_selic', taxa_atual_selic)
+    
+    try{
+        const response = await fetch('/investimentos/', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error('Erro no servidor: ' + (errorData.detail || response.status));
+        }
+
+        const data = await response.json();
+        console.log('Dados recebidos:', data);
+
+        // Mostrando na página
+        document.getElementById('resultsSection').style.display = 'block'
+        
+        document.getElementById('rentabilidade').innerText = data['rentabilidade_total_percentual'].toFixed(2);
+        document.getElementById('valor_final').innerText = data['valor_final'].toFixed(2);
+
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao calcular seus investimentos. Verifique o console para mais detalhes.');
+    }
+}
+
 // Funções para criar tabelas (mantidas inalteradas)
 function criarTabelaSAC() {
     const table = document.getElementById('sacTable');
