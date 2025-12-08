@@ -23,6 +23,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Adicionando evento ao formulário de investimentos (investimentos.html)
+    const form2 = document.getElementById('investForm');
+    if (form2) {
+        form2.addEventListener('submit', function(e) {
+            e.preventDefault()
+            simularInvestimentos();
+        });
+    }
+    
     // Se já existem dados carregados (amortizacao.html), criar gráficos
     if (typeof sacData !== 'undefined' && (sacData.length > 0 || priceData.length > 0 || samData.length > 0 || pagamento_variavelData.length > 0)) {
         criarResumos();
