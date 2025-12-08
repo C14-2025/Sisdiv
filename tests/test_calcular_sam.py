@@ -188,3 +188,28 @@ def test_calcular_sam_sem_carencia_nao_chama_mock(mock_carencia):
     assert ultima["prestacao"] == pytest.approx(juros_mensal + valor)
     assert ultima["amortizacao"] == valor
     assert ultima["saldo_devedor"] == 0.00
+    #
+    def test_calcular_sam_saldo_consistente():
+        """Saldo devedor nunca deve aumentar durante o cálculo."""
+        resultado = calcular_sam(1000, 0.05, 5, 0)
+        saldos = [p["saldo_devedor"] for p in resultado]
+        assert all(saldos[i] >= saldos[i+1] for i in range(len(saldos) - 1))
+    def test_calcular_sam_prazo_longo():
+        """Testa se o SAM suporta prazos longos sem erro."""
+        resultado = calcular_sam(1000, 0.05, 120, 0)  # 10 anos
+        assert len(resultado) == 120
+        assert resultado[-1]["saldo_devedor"] == 0
+    def test_calcular_sam_soma_amortizacoes():
+        """A soma das amortizações deve ser igual ao valor inicial do empréstimo."""
+        valor = 1000
+        resultado = calcular_sam(valor, 0.05, 6, 0)
+        soma_amortizacoes = sum(p["amortizacao"] for p in resultado)
+        assert soma_amortizacoes == pytest.approx(valor)
+    def test_calcular_sam_soma_juros():
+        """A soma dos juros deve ser prazo * valor * taxa no SAM."""
+        valor = 1000
+        taxa = 0.05
+        prazo = 4
+        resultado = calcular_sam(valor, taxa, prazo, 0)
+        soma_juros = sum(p["juros"] for p in resultado)
+        assert soma_juros == pytest.approx(prazo * valor * taxa)
