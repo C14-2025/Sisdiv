@@ -8,7 +8,7 @@ def get_taxa_atual_SELIC():
         taxa_atual = float(taxa_atual_raw.json()[0]['valor'].replace(',', '.'))
         return taxa_atual
     except Exception as e:
-        raise Exception(f"Erro ao buscar a taxa SELIC da API: {str(e)}")
+        raise Exception("Erro ao buscar a taxa SELIC da API")
 
 def simular_comparacao_SELIC(tipo: str,
                              percentual_base: float,
