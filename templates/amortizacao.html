@@ -39,9 +39,6 @@
         {% if resultados.sam %}
         <button class="tab-button" onclick="showTab('sam')">📊 Sam</button>
         {% endif %}
-        {% if resultados.pagamento_variavel %}
-        <button class="tab-button" onclick="showTab('pagamento variavel')">📊 Pagamento Variavel</button>
-        {% endif %}
         {% if resultados.sac and resultados.price %}
         <button class="tab-button" onclick="showTab('comparison')">⚖️ Comparação</button>
         {% endif %}
@@ -149,40 +146,6 @@
     </div>
     {% endif %}
 
-    {% if resultados.pagamento_variavel %}
-        <div id="pagamento_variavel-tab" class="tab-content active">
-            <h2>Sistema de Amortização Constante (Pagamento Variavel)</h2>
-            <div class="summary-cards" id="pagamento_variavelSummary"></div>
-            <div class="chart-container">
-                <canvas id="pagamento_variavelChart"></canvas>
-            </div>
-            <div class="table-container">
-                <table id="pagamento_variavelTable">
-                    <thead>
-                        <tr>
-                            <th>Parcela</th>
-                            <th>Prestação</th>
-                            <th>Juros</th>
-                            <th>Amortização</th>
-                            <th>Saldo Devedor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in resultados.pagamento_variavel %}
-                        <tr>
-                            <td>{{ row.parcela }}</td>
-                            <td>R$ {{ "%.2f"|format(row.prestacao) }}</td>
-                            <td>R$ {{ "%.2f"|format(row.juros) }}</td>
-                            <td>R$ {{ "%.2f"|format(row.amortizacao) }}</td>
-                            <td>R$ {{ "%.2f"|format(row.saldo_devedor) }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        {% endif %}
-
     {% if resultados.sac and resultados.price %}
     <div id="comparison-tab" class="tab-content">
         <h2>Comparação SAC vs Price</h2>
@@ -214,7 +177,5 @@
     const sacData = {{ resultados.sac | tojson if resultados.sac else '[]' }};
     const priceData = {{ resultados.price | tojson if resultados.price else '[]' }};
     const samData = {{ resultados.sam | tojson if resultados.sam else '[]' }};
-    const pagamento_variavelData = {{ resultados.pagamento_variavel | tojson if resultados.pagamento_variavel else '[]' }};
 </script>
 {% endblock %}
-

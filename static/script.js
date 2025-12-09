@@ -4,12 +4,10 @@
 let sacData = [];
 let priceData = [];
 let samData = [];
-let pagamento_variavelData = [];
 
 let sacChartInstance = null;
 let priceChartInstance = null;
 let samChartInstance = null;
-let pagamento_variavelChartInstance = null;
 let comparisonChartInstance = null;
 
 // Inicialização quando o documento estiver carregado
@@ -60,24 +58,6 @@ async function calcular() {
     formData.append('carencia', carencia);
     formData.append('metodo', metodo);
 
-    if (metodo === 'pagamento_variavel') {
-        const amortizacoesInput = document.getElementById('amortizacoes_input').value;
-        const amortizacoesArray = amortizacoesInput
-            .split(',')
-            .map(s => s.trim())
-            .filter(s => s.length > 0)
-            .map(parseFloat);
-
-        if (amortizacoesArray.some(isNaN) || amortizacoesArray.length === 0) {
-            alert('Erro: A lista de amortizações está vazia ou contém valores não numéricos.');
-            return;
-        }
-
-        formData.append('amortizacoes_json', JSON.stringify(amortizacoesArray));
-        formData.set('prazo', amortizacoesArray.length);
-    }
-
-
     try {
         // Fazer requisição para o backend
         const response = await fetch('/calcular/', {
@@ -115,15 +95,8 @@ async function calcular() {
             samData = []; // Limpa
         }
 
-        if (data.pagamento_variavel) {
-            pagamento_variavelData = data.pagamento_variavel;
-            criarTabelapagamento_variavel();
-        } else {
-            pagamento_variavelData = []; // Limpa
-        }
-
         // Criar resumos e gráficos se houver dados
-        if (sacData.length > 0 || priceData.length > 0 || samData.length > 0 || pagamento_variavelData.length > 0) {
+        if (sacData.length > 0 || priceData.length > 0 || samData.length > 0) {
             criarResumos();
             criarGraficos();
             document.getElementById('resultsSection').style.display = 'block';
@@ -290,39 +263,6 @@ function criarTabelaSAM() {
     table.innerHTML = html;
 }
 
-function criarTabelapagamento_variavel() {
-    const table = document.getElementById('pagamento_variavelTable');
-    if (!table) return;
-
-    let html = `
-        <thead>
-            <tr>
-                <th>Parcela</th>
-                <th>Prestação</th>
-                <th>Juros</th>
-                <th>Amortização</th>
-                <th>Saldo Devedor</th>
-            </tr>
-        </thead>
-        <tbody>
-    `;
-
-    pagamento_variavelData.forEach(row => {
-        html += `
-            <tr>
-                <td>${row.parcela}</td>
-                <td>R$ ${row.prestacao.toFixed(2).replace('.', ',')}</td>
-                <td>R$ ${row.juros.toFixed(2).replace('.', ',')}</td>
-                <td>R$ ${row.amortizacao.toFixed(2).replace('.', ',')}</td>
-                <td>R$ ${row.saldo_devedor.toFixed(2).replace('.', ',')}</td>
-            </tr>
-        `;
-    });
-
-    html += '</tbody>';
-    table.innerHTML = html;
-}
-
 // ------------------ Funções de Resumos e Gráficos ------------------
 
 function criarResumos() {
@@ -348,7 +288,6 @@ function criarResumos() {
     createSummaryCards(sacData, 'sacSummary', 'Primeira Prestação');
     createSummaryCards(priceData, 'priceSummary', 'Prestação Fixa');
     createSummaryCards(samData, 'samSummary', 'Prestação Juros');
-    createSummaryCards(pagamento_variavelData, 'pagamento_variavelSummary', 'Primeira Prestação');
 
 
     // **CORREÇÃO:** Comparação APENAS SAC vs Price, e só exibe se ambos existirem
@@ -429,25 +368,6 @@ function criarGraficos() {
             options: { responsive: true, plugins: { title: { display: true, text: 'Evolução das Parcelas - SAM' } } }
         });
     }
-
-    // Gráfico Pagamento Variavel (Mantido)
-    if (pagamento_variavelData.length > 0 && document.getElementById('pagamento_variavelChart')) {
-        const ctxPV = document.getElementById('pagamento_variavelChart').getContext('2d');
-        if (pagamento_variavelChartInstance) { pagamento_variavelChartInstance.destroy(); }
-        pagamento_variavelChartInstance = new Chart(ctxPV, {
-            type: 'line',
-            data: {
-                labels: pagamento_variavelData.map(row => `Parcela ${row.parcela}`),
-                datasets: [
-                    { label: 'Prestação', data: pagamento_variavelData.map(row => row.prestacao), borderColor: '#f1c40f', backgroundColor: 'rgba(241, 196, 15, 0.1)', tension: 0.4 },
-                    { label: 'Juros', data: pagamento_variavelData.map(row => row.juros), borderColor: '#9b59b6', backgroundColor: 'rgba(155, 89, 182, 0.1)', tension: 0.4 },
-                    { label: 'Amortização', data: pagamento_variavelData.map(row => row.amortizacao), borderColor: '#1abc9c', backgroundColor: 'rgba(26, 188, 156, 0.1)', tension: 0.4 }
-                ]
-            },
-            options: { responsive: true, plugins: { title: { display: true, text: 'Evolução das Parcelas - Pagamento Variavel' } } }
-        });
-    }
-
 
     // **CORREÇÃO:** Gráfico Comparação SAC vs Price (APENAS SAC e Price, Título Fixo)
     if (document.getElementById('comparisonChart') && sacData.length > 0 && priceData.length > 0) {
