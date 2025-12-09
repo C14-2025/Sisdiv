@@ -122,7 +122,13 @@ async def calcular_amortizacao(
 
 @app.get("/investimentos")
 def investimentos_page(request: Request):
-    return templates.TemplateResponse("investimentos.html", {"request": request})
+    try:
+        return templates.TemplateResponse("investimentos.html", {"request": request})
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao carregar a página de investimentos: {str(e)}"
+        )
 
 @app.post("/investimentos/")
 def simular_investimentos(
