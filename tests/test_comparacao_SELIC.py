@@ -1,56 +1,51 @@
 import pytest
 import src.calculadoras.comparacao_SELIC as comp
 
-def test_simular_comparacao():
-    prazo_anos = 2
-    valor_investido = 1000.0
-    taxa_atual_SELIC = 10.0
-
-    cdb = comp.simular_comparacao_SELIC(
-        tipo="CDB",
-        percentual_base=80.0,
-        prazo_anos=prazo_anos,
-        valor_investido=valor_investido,
-        taxa_atual_SELIC=taxa_atual_SELIC
-    )
-    assert isinstance(cdb, dict)
-    assert cdb["tipo"] == "CDB"
-    assert pytest.approx(cdb["rentabilidade_total_percentual"], rel=1e-9) == 16.0
-    assert cdb["valor_final"] == 1160.00
-
-    poup = comp.simular_comparacao_SELIC(
-        tipo="Poupanca",
-        percentual_base=50.0,
-        prazo_anos=prazo_anos,
-        valor_investido=valor_investido,
-        taxa_atual_SELIC=taxa_atual_SELIC
-    )
-    assert isinstance(poup, dict)
-    assert poup["tipo"] == "Poupanca"
-    assert pytest.approx(poup["rentabilidade_total_percentual"], rel=1e-9) == 10.0
-    assert poup["valor_final"] == 1100.00
-
-
-def test_simular_comparacao_usa_get_taxa_qdo_vazio(monkeypatch):
+def test_simular_comparacao_mock(monkeypatch):
     called = {"count": 0}
     def fake_get_taxa():
         called["count"] += 1
         return 7.5
     monkeypatch.setattr(comp, "get_taxa_atual_SELIC", fake_get_taxa)
 
-    resultados = comp.simular_comparacao_SELIC(
-        tipo="FundoX",
-        percentual_base=100.0,
-        prazo_anos=1,
-        valor_investido=200.0,
-        taxa_atual_SELIC=None
-    )
+    results1 = comp.simular_comparacao_SELIC('CDB', 110.0, 4, 520.0)
+    '''
+    expected = {
+        'tipo': 'CDB',
+        'percentual_base': 110.0,
+        'prazo_anos': 4,
+        'valor_investido': 520.0,
+        'taxa_atual_SELIC': 7.5,
+        'rentabilidade_total_percentual': 33.0,
+        'valor_final': 691.6
+    }
+    '''
+    # asserts
+    assert called['count'] == 1
+    assert isinstance(results1, dict)
+    assert pytest.approx(results1['rentabilidade_total_percentual'], rel=1e-9) == 33.0
+    assert pytest.approx(results1['valor_final'], rel=1e-9) == 691.6
+    
+    # reiniciando o contador de chamadas da função mock
+    called['count'] = 0
+    results2 = comp.simular_comparacao_SELIC('Poupança', 80.0, 6, 1000.0)
+    '''
+    expected = {
+        'tipo': 'Poupança',
+        'percentual_base': 80.0,
+        'prazo_anos': 6,
+        'valor_investido': 1000.0,
+        'taxa_atual_SELIC': 7.5,
+        'rentabilidade_total_percentual': 36.0,
+        'valor_final': 1360.0
+    }
+    '''
+    # asserts
+    assert called['count'] == 1
+    assert isinstance(results2, dict)
+    assert pytest.approx(results2['rentabilidade_total_percentual'], rel=1e-9) == 36.0
+    assert pytest.approx(results2['valor_final'], rel=1e-9) == 1360.0
 
-    assert called["count"] == 1
-    assert isinstance(resultados, dict)
-    assert resultados["tipo"] == "FundoX"
-    assert pytest.approx(resultados["rentabilidade_total_percentual"], rel=1e-9) == 7.5
-    assert resultados["valor_final"] == 215.00
 
 def test_simular_comparacao_erro_em_get_taxa(monkeypatch):
     def fake_get_taxa():
@@ -62,10 +57,9 @@ def test_simular_comparacao_erro_em_get_taxa(monkeypatch):
             tipo="A",
             percentual_base=100.0,
             prazo_anos=1,
-            valor_investido=100.0,
-            taxa_atual_SELIC=None
+            valor_investido=100.0
         )
-    assert "Erro ao buscar a taxa SELIC" in str(excinfo.value)
+    assert "Erro ao buscar a taxa SELIC da API" in str(excinfo.value)
 
 def _skip(exc):
     pytest.skip(f"API nao acessivel: {exc}")
