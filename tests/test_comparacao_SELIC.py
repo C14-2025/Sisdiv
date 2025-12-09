@@ -94,8 +94,7 @@ def test_simular_comparacao_com_API_integration():
                 tipo=tipo,
                 percentual_base=pct,
                 prazo_anos=prazo_anos,
-                valor_investido=valor_investido,
-                taxa_atual_SELIC=None
+                valor_investido=valor_investido
             )
             resultados.append(r)
     except Exception as e:
