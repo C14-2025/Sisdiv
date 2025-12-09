@@ -21,10 +21,6 @@
                 <label for="valor_investido">Valor investido (R$)</label>
                 <input type="number" id="valor_investido" name="valor_investido" step="0.01" min="0" required>
             </div>
-            <div class="form-group">
-                <label for="taxa_atual_selic">Taxa atual do Selic (%)</label>
-                <input type="number" id="taxa_atual_selic" name="taxa_atual_selic" step="0.01" min="0">
-            </div>
         </div>
 
         <div class="btn-group">
@@ -36,6 +32,7 @@
 
 <div class="results-section" id="resultsSection" style="margin-top:20px; display: none;">
     <h3>Resultado da Simulação</h3>
+    <p><strong>Taxa atual SELIC:</strong> <span id="taxa_atual_selic"></span>%</p>
     <p><strong>Rentabilidade total:</strong> <span id="rentabilidade"></span>%</p>
     <p><strong>Valor final:</strong> R$ <span id="valor_final"></span></p>
 </div>

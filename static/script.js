@@ -121,7 +121,6 @@ async function simularInvestimentos() {
     const percentual_base = parseFloat(document.getElementById('percentual_base').value);
     const prazo_anos = parseInt(document.getElementById('prazo_anos').value);
     const valor_investido = parseFloat(document.getElementById('valor_investido').value);
-    const taxa_atual_selic = parseFloat(document.getElementById('taxa_atual_selic').value);
 
     // taxa atual selic é opcional porque pode ser puxada da API do banco central
     // verificando se todos os campos obrigatórios foram preenchidos
@@ -135,7 +134,6 @@ async function simularInvestimentos() {
     formData.append('percentual_base', percentual_base)
     formData.append('prazo_anos', prazo_anos)
     formData.append('valor_investido', valor_investido)
-    formData.append('taxa_atual_selic', taxa_atual_selic)
     
     try{
         const response = await fetch('/investimentos/', {
@@ -154,6 +152,7 @@ async function simularInvestimentos() {
         // Mostrando na página
         document.getElementById('resultsSection').style.display = 'block'
         
+        document.getElementById('taxa_atual_selic').innerText = data['taxa_atual_SELIC'].toFixed(2);
         document.getElementById('rentabilidade').innerText = data['rentabilidade_total_percentual'].toFixed(2);
         document.getElementById('valor_final').innerText = data['valor_final'].toFixed(2);
 

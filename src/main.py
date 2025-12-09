@@ -136,7 +136,6 @@ def simular_investimentos(
         percentual_base: float = Form(...),
         prazo_anos: int = Form(...),
         valor_investido: float = Form(...),
-        taxa_atual_SELIC: Optional[float] = Form(None)
 ):
     """
     Simula diferentes tipos de investimentos com base na taxa SELIC atual
@@ -147,8 +146,7 @@ def simular_investimentos(
             tipo=tipo,
             percentual_base=percentual_base,
             prazo_anos=prazo_anos,
-            valor_investido=valor_investido,
-            taxa_atual_SELIC=taxa_atual_SELIC
+            valor_investido=valor_investido
         )
 
         return JSONResponse(content=resultado)
